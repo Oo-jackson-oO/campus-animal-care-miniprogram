@@ -1,0 +1,30 @@
+module.exports = [
+    {
+    id: 1,
+    title: "紧急救助通知",
+    content: "图书馆附近发现受伤小猫，需要志愿者协助送医",
+    type: "紧急",
+    priority: 1,
+    status: "发布中",
+    createTime: "2024-01-15T09:00:00Z"
+    },
+    {
+    id: 2,
+    title: "义卖活动通知",
+    content: "本周文创义卖收益将用于流浪动物疫苗",
+    type: "活动",
+    priority: 2,
+    status: "发布中",
+    createTime: "2024-01-10T14:00:00Z"
+    },
+    {
+    id: 3,
+    title: "故事征集",
+    content: "欢迎分享你和校园毛孩子的故事",
+    type: "征集",
+    priority: 3,
+    status: "发布中",
+    createTime: "2024-01-05T10:00:00Z"
+    }
+];
+

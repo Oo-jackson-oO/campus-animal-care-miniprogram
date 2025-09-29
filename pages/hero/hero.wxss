@@ -1,0 +1,245 @@
+/* 现代动物详情页面设计 */
+.container {
+  padding: 16rpx;
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  min-height: 100vh;
+  position: relative;
+}
+
+/* 现代动物详情信息区域 */
+.animal-detail {
+  display: flex;
+  align-items: flex-start;
+  background: linear-gradient(135deg, #ffffff 0%, #fafbfc 100%);
+  border-radius: 24rpx;
+  padding: 32rpx;
+  box-shadow: 0 8rpx 30rpx rgba(0, 0, 0, 0.08);
+  border: 1rpx solid rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(10rpx);
+  margin-bottom: 24rpx;
+  position: relative;
+  overflow: hidden;
+}
+
+.animal-detail::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 6rpx;
+  background: linear-gradient(135deg, #FF6600 0%, #FF8A00 100%);
+}
+
+.animal-image {
+  width: 200rpx;
+  height: 200rpx;
+  border-radius: 50%;
+  margin-right: 32rpx;
+  border: 4rpx solid #FFE0B3;
+  box-shadow: 0 8rpx 25rpx rgba(255, 102, 0, 0.2);
+  transition: all 0.3s ease;
+  position: relative;
+  z-index: 2;
+}
+
+.animal-image:hover {
+  transform: scale(1.05);
+  box-shadow: 0 12rpx 35rpx rgba(255, 102, 0, 0.3);
+}
+
+.animal-detail .info {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  flex: 1;
+  position: relative;
+  z-index: 2;
+}
+
+.animal-detail .info .name {
+  font-size: 40rpx;
+  color: #2d3748;
+  font-weight: 700;
+  margin-bottom: 20rpx;
+  background: linear-gradient(135deg, #FF6600 0%, #FF8A00 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.animal-detail .info .description {
+  font-size: 30rpx;
+  color: #4a5568;
+  margin-bottom: 20rpx;
+  line-height: 1.6;
+  font-weight: 500;
+}
+
+.animal-detail .info .status {
+  font-size: 28rpx;
+  color: #FF6600;
+  background: linear-gradient(135deg, #FFE0B3 0%, #FFF3E0 100%);
+  padding: 12rpx 24rpx;
+  border-radius: 24rpx;
+  display: inline-block;
+  width: fit-content;
+  font-weight: 600;
+  box-shadow: 0 4rpx 15rpx rgba(255, 102, 0, 0.2);
+  border: 2rpx solid rgba(255, 102, 0, 0.3);
+}
+
+/* 现代讨论区区域 */
+.comment-area {
+  background: linear-gradient(135deg, #ffffff 0%, #fafbfc 100%);
+  border-radius: 24rpx;
+  padding: 32rpx;
+  box-shadow: 0 8rpx 30rpx rgba(0, 0, 0, 0.08);
+  border: 1rpx solid rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(10rpx);
+  position: relative;
+  overflow: hidden;
+}
+
+.comment-area::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4rpx;
+  background: linear-gradient(135deg, #FF6600 0%, #FF8A00 100%);
+}
+
+.comment-area .title {
+  font-size: 36rpx;
+  color: #FF6600;
+  font-weight: 700;
+  margin-bottom: 28rpx;
+  border-left: 8rpx solid #FF6600;
+  padding-left: 20rpx;
+  background: linear-gradient(135deg, #FF6600 0%, #FF8A00 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  position: relative;
+  z-index: 2;
+}
+
+/* 现代单条评论样式 */
+.comment {
+  border-bottom: 1rpx solid #e2e8f0;
+  padding-bottom: 24rpx;
+  margin-bottom: 24rpx;
+  border-radius: 12rpx;
+  padding: 20rpx;
+  background: rgba(255, 102, 0, 0.02);
+  transition: all 0.3s ease;
+  position: relative;
+  z-index: 2;
+}
+
+.comment:hover {
+  background: rgba(255, 102, 0, 0.05);
+  transform: translateX(8rpx);
+}
+
+.comment:last-child {
+  border-bottom: none;
+}
+
+.comment-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12rpx;
+}
+
+.comment .user {
+  font-size: 30rpx;
+  color: #FF6600;
+  font-weight: 700;
+  background: linear-gradient(135deg, #FF6600 0%, #FF8A00 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.comment .time {
+  font-size: 26rpx;
+  color: #a0aec0;
+  font-weight: 500;
+}
+
+.comment .content {
+  font-size: 30rpx;
+  color: #2d3748;
+  line-height: 1.6;
+  font-weight: 500;
+}
+
+/* 现代评论输入区域 */
+.comment-input {
+  display: flex;
+  align-items: center;
+  margin-top: 28rpx;
+  gap: 20rpx;
+  position: relative;
+  z-index: 2;
+}
+
+.comment-input input {
+  flex: 1;
+  height: 80rpx;
+  font-size: 30rpx;
+  padding: 0 24rpx;
+  border: 2rpx solid #e2e8f0;
+  border-radius: 40rpx;
+  color: #2d3748;
+  background: #ffffff;
+  transition: all 0.3s ease;
+  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.04);
+}
+
+.comment-input input:focus {
+  border-color: #FF6600;
+  background: #ffffff;
+  box-shadow: 0 0 0 6rpx rgba(255, 102, 0, 0.1);
+  outline: none;
+}
+
+.comment-input button {
+  height: 80rpx;
+  line-height: 80rpx;
+  padding: 0 36rpx;
+  background: linear-gradient(135deg, #FF6600 0%, #FF8A00 100%);
+  color: #fff;
+  font-size: 30rpx;
+  font-weight: 600;
+  border: none;
+  border-radius: 40rpx;
+  box-shadow: 0 4rpx 15rpx rgba(255, 102, 0, 0.3);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.comment-input button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left 0.5s;
+}
+
+.comment-input button:active {
+  transform: translateY(2rpx) scale(0.95);
+  box-shadow: 0 2rpx 8rpx rgba(255, 102, 0, 0.4);
+}
+
+.comment-input button:active::before {
+  left: 100%;
+}

@@ -1,0 +1,84 @@
+<view class="container">
+  <view class="title">守护侠 - 本周事项</view>
+  
+  <!-- 周历控制 + 月份/周数显示 -->
+  <view class="week-control">
+    <button class="week-btn" bindtap="prevWeek">
+      <text>上周</text>
+    </button>
+    <view class="week-info">
+      {{currentMonth}}月第{{currentWeek}}周
+    </view>
+    <button class="week-btn" bindtap="nextWeek">
+      <text>下周</text>
+    </button>
+  </view>
+
+  <!-- 周历显示 -->
+  <view class="week-calendar">
+    <!-- 星期标题 -->
+    <view class="week-header">
+      <view class="weekday-title" wx:for="{{['日','一','二','三','四','五','六']}}" wx:key="*this">
+        {{item}}
+      </view>
+    </view>
+    
+    <!-- 日期显示 -->
+    <view class="week-dates">
+      <view 
+        class="date-item {{item.isCurrentMonth ? '' : 'disabled'}} {{item.isToday ? 'today' : ''}} {{item.isSelected ? 'selected' : ''}}"
+        wx:for="{{weekDays}}" 
+        wx:key="index"
+        bindtap="onDateTap"
+        data-index="{{index}}"
+      >
+        <text class="date-number">{{item.date.getDate()}}</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 本周事项标题 -->
+  <view class="section-title">本周事项</view>
+
+  <!-- 捐款进度列表 -->
+  <view class="progress-list" wx:if="{{filteredAnimals.length > 0}}">
+    <view class="animal-card" wx:for="{{filteredAnimals}}" wx:key="id">
+      <view class="animal-info">
+        <image src="{{item.image}}" mode="aspectFill" class="animal-avatar"></image>
+        <view class="animal-details">
+          <text class="animal-name">{{item.name}}</text>
+          <text class="animal-need">{{item.need}}</text>
+        </view>
+      </view>
+      
+      <view class="progress-container">
+        <progress 
+          percent="{{(item.donateCurrent / item.donateTarget)*100}}" 
+          stroke-width="8"
+          class="progress-bar"
+        />
+        <view class="progress-info">
+          <text class="raised">已筹: ¥{{item.donateCurrent}}</text>
+          <text class="target">目标: ¥{{item.donateTarget}}</text>
+        </view>
+      </view>
+      
+      <view class="donate-section">
+        <input 
+          type="number" 
+          placeholder="输入捐款金额" 
+          bindinput="onDonateInput" 
+          data-id="{{item.id}}"
+          class="donate-input"
+          value="{{donateInput[item.id]}}"
+        />
+        <button bindtap="handleDonate" data-id="{{item.id}}" class="donate-btn">捐款</button>
+      </view>
+    </view>
+  </view>
+  
+  <!-- 无事项时显示 -->
+  <view class="no-events" wx:if="{{filteredAnimals.length === 0}}">
+    <text>该日期暂无事项安排</text>
+  </view>
+</view>

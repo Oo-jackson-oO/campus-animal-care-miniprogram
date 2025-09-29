@@ -1,0 +1,69 @@
+module.exports = [
+    {
+    id: 1,
+    name: "小橘",
+    gender: "公",
+    age: "2岁",
+    breed: "橘猫",
+    sterilized: false,
+    status: "健康",
+    description: "友善亲人的橘猫，经常在图书馆附近活动，喜欢晒太阳",
+    image: "/image/dog.png",
+    location: "图书馆附近",
+    healthRecords: [
+            {
+        date: "2024-01-15",
+        type: "体检",
+        result: "健康",
+        note: "定期体检，一切正常"
+            }
+        ],
+    createTime: "2024-01-01T00:00:00Z",
+    updateTime: "2024-01-15T00:00:00Z"
+    },
+    {
+    id: 2,
+    name: "雪球",
+    gender: "母",
+    age: "3岁",
+    breed: "白猫",
+    sterilized: true,
+    status: "健康",
+    description: "温顺的白猫，已经绝育，喜欢和同学们玩耍",
+    image: "/image/dog.png",
+    location: "宿舍区",
+    healthRecords: [
+            {
+        date: "2024-01-10",
+        type: "绝育手术",
+        result: "成功",
+        note: "手术顺利，恢复良好"
+            }
+        ],
+    createTime: "2024-01-01T00:00:00Z",
+    updateTime: "2024-01-10T00:00:00Z"
+    },
+    {
+    id: 3,
+    name: "奥利奥",
+    gender: "公",
+    age: "1岁",
+    breed: "黑白猫",
+    sterilized: false,
+    status: "待治疗",
+    description: "黑白相间的小猫，活泼好动，正在等待绝育手术",
+    image: "/image/dog.png",
+    location: "食堂附近",
+    healthRecords: [
+            {
+        date: "2024-01-20",
+        type: "检查",
+        result: "需要绝育",
+        note: "身体健康，可以安排绝育手术"
+            }
+        ],
+    createTime: "2024-01-01T00:00:00Z",
+    updateTime: "2024-01-20T00:00:00Z"
+    }
+];
+

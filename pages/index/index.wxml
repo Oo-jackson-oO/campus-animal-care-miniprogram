@@ -1,0 +1,73 @@
+<view class="container">
+  <!-- 现代公告滚动栏 -->
+  <view class="notice-container">
+    <view class="notice-header">
+      <view class="notice-icon">📢</view>
+      <text class="notice-title">重要通知</text>
+      <view class="notice-indicator">
+        <view class="indicator-dot {{currentNoticeIndex === index ? 'active' : ''}}" 
+              wx:for="{{notices}}" 
+              wx:key="id" 
+              wx:for-index="index"></view>
+      </view>
+    </view>
+    
+    <view class="notice-content">
+      <swiper class="notice-swiper" 
+              autoplay="{{notices.length > 1}}" 
+              circular="{{notices.length > 1}}" 
+              interval="4000" 
+              vertical="true"
+              bindchange="onNoticeChange">
+        <swiper-item wx:for="{{notices}}" wx:key="id" class="notice-item">
+          <view class="notice-card" 
+                style="background: {{item.bgColor}}; border-left-color: {{item.color}};"
+                bindtap="onNoticeTap" 
+                data-notice="{{item}}">
+            <view class="notice-card-header">
+              <text class="notice-type-icon">{{item.icon}}</text>
+              <text class="notice-type-text" style="color: {{item.color}};">{{item.title}}</text>
+              <view class="notice-time">{{item.timeAgo}}</view>
+            </view>
+            <view class="notice-card-content">
+              <text class="notice-text">{{item.content}}</text>
+            </view>
+            <view class="notice-card-footer">
+              <text class="notice-more">点击查看详情 →</text>
+            </view>
+          </view>
+        </swiper-item>
+      </swiper>
+    </view>
+  </view>
+
+  <!-- 文创产品（可左右滑动） -->
+  <view class="title">文创产品</view>
+  <scroll-view scroll-x class="products-scroll">
+    <view class="product-item" wx:for="{{products}}" wx:key="id" bindtap="onProductTap" data-id="{{item.id}}">
+      <image src="{{item.image}}" mode="widthFix"></image>
+      <view class="product-info">
+        <text class="product-name">{{item.name}}</text>
+        <view class="product-price">
+          <text class="current-price">¥{{item.price}}</text>
+          <text class="original-price" wx:if="{{item.originalPrice > item.price}}">¥{{item.originalPrice}}</text>
+        </view>
+        <view class="product-meta">
+          <text class="rating">★ {{item.rating}}</text>
+          <text class="sales">已售{{item.sales}}</text>
+        </view>
+      </view>
+    </view>
+  </scroll-view>
+
+  <!-- 动物列表 -->
+  <view class="title">校园动物</view>
+  <view class="animal-list">
+    <view wx:for="{{animals}}" wx:key="id" class="animal-card" bindtap="onAnimalTap" data-id="{{item.id}}">
+      <image src="{{item.image}}" mode="widthFix"></image>
+      <view class="animal-info">
+        <text>名字：{{item.name}} | 性别：{{item.gender}} | 绝育：{{item.sterilized ? '是' : '否'}}</text>
+      </view>
+    </view>
+  </view>
+</view>

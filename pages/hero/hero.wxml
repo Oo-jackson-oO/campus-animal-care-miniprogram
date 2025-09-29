@@ -1,0 +1,27 @@
+<view class="container">
+  <!-- 动物基础信息 -->
+  <view class="animal-detail">
+    <image src="{{animal.image}}" mode="aspectFill" class="animal-image"></image>
+    <view class="info">
+      <text class="name">{{animal.name}}</text>
+      <text class="description">{{animal.description}}</text>
+      <text class="status">状态：{{animal.status}}</text>
+    </view>
+  </view>
+
+  <!-- 讨论区 -->
+  <view class="comment-area">
+    <view class="title">讨论区</view>
+    <view class="comment" wx:for="{{comments}}" wx:key="id">
+      <view class="comment-header">
+        <text class="user">{{item.user}}</text>
+        <text class="time">{{item.time}}</text>
+      </view>
+      <text class="content">{{item.content}}</text>
+    </view>
+    <view class="comment-input">
+      <input type="text" placeholder="说点什么..." bindinput="onCommentInput" value="{{commentContent}}" />
+      <button bindtap="submitComment">发布</button>
+    </view>
+  </view>
+</view>

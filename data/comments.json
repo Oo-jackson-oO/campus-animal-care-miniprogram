@@ -1,0 +1,30 @@
+module.exports = [
+    {
+    id: 1,
+    animalId: 1,
+    userId: "user001",
+    userName: "爱心天使",
+    content: "希望小橘早日康复～",
+    likes: 5,
+    createTime: "2024-01-01T10:00:00Z"
+    },
+    {
+    id: 2,
+    animalId: 1,
+    userId: "user002",
+    userName: "守护者",
+    content: "小橘很可爱，经常在图书馆看到它",
+    likes: 3,
+    createTime: "2024-01-02T14:30:00Z"
+    },
+    {
+    id: 3,
+    animalId: 2,
+    userId: "user003",
+    userName: "暖心人",
+    content: "雪球已经绝育了，很健康！",
+    likes: 8,
+    createTime: "2024-01-10T16:20:00Z"
+    }
+];
+

@@ -1,0 +1,130 @@
+<view class="container" wx:if="{{!loading}}">
+  <!-- 商品图片轮播 -->
+  <view class="product-images">
+    <swiper class="image-swiper" indicator-dots="false" autoplay="false" circular="true" bindchange="onSwiperChange">
+      <swiper-item wx:for="{{product.images}}" wx:key="index" bindtap="previewImage" data-index="{{index}}">
+        <image src="{{item}}" mode="aspectFill" class="product-image"></image>
+      </swiper-item>
+    </swiper>
+    
+    <!-- 图片指示器 -->
+    <view class="image-indicators" wx:if="{{product && product.images && product.images.length > 1}}">
+      <view 
+        class="indicator {{currentImageIndex === index ? 'active' : ''}}"
+        wx:for="{{product.images}}" 
+        wx:key="index"
+        bindtap="onImageChange"
+        data-index="{{index}}"
+      ></view>
+    </view>
+  </view>
+
+  <!-- 商品基本信息 -->
+  <view class="product-info">
+    <view class="price-section">
+      <text class="current-price">¥{{product.price}}</text>
+      <text class="original-price" wx:if="{{product.originalPrice > product.price}}">¥{{product.originalPrice}}</text>
+    </view>
+    
+    <view class="title">{{product.name}}</view>
+    
+    <view class="meta-info">
+      <view class="rating">
+        <text class="stars">★★★★★</text>
+        <text class="rating-text">{{product.rating}}分</text>
+        <text class="review-count">({{product.reviewCount}}条评价)</text>
+      </view>
+      <view class="sales">已售{{product.sales}}件</view>
+    </view>
+    
+    <view class="description">{{product.description}}</view>
+  </view>
+
+  <!-- 商品特色 -->
+  <view class="features-section">
+    <view class="section-title">商品特色</view>
+    <view class="features-list">
+      <view class="feature-item" wx:for="{{product.features}}" wx:key="index">
+        <text class="feature-icon">✓</text>
+        <text class="feature-text">{{item}}</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 商品详情 -->
+  <view class="details-section">
+    <view class="section-title">商品详情</view>
+    <view class="details-content">
+      <text class="details-text">{{product.details}}</text>
+    </view>
+  </view>
+
+  <!-- 用户评价 -->
+  <view class="reviews-section">
+    <view class="section-title">
+      <text>用户评价</text>
+      <text class="review-count">({{reviews.length}}条)</text>
+    </view>
+    
+    <view class="reviews-list" wx:if="{{reviews.length > 0}}">
+      <view class="review-item" wx:for="{{reviews}}" wx:key="id">
+        <view class="review-header">
+          <image src="{{item.avatar}}" class="user-avatar"></image>
+          <view class="user-info">
+            <text class="user-name">{{item.userName}}</text>
+            <view class="review-rating">
+              <text class="stars">{{item.rating}}分</text>
+            </view>
+          </view>
+          <text class="review-time">{{item.createTime}}</text>
+        </view>
+        <view class="review-content">{{item.content}}</view>
+        <view class="review-images" wx:if="{{item.images.length > 0}}">
+          <image 
+            src="{{img}}" 
+            class="review-image" 
+            wx:for="{{item.images}}" 
+            wx:key="*this"
+            bindtap="previewImage"
+            data-index="{{index}}"
+          ></image>
+        </view>
+        <view class="review-footer">
+          <text class="like-count">👍 {{item.likes}}</text>
+        </view>
+      </view>
+    </view>
+    
+    <view class="no-reviews" wx:else>
+      <text>暂无评价</text>
+    </view>
+  </view>
+
+  <!-- 底部操作栏 -->
+  <view class="bottom-bar">
+    <view class="quantity-section">
+      <text class="quantity-label">数量：</text>
+      <view class="quantity-controls">
+        <button class="quantity-btn" bindtap="decreaseQuantity" disabled="{{quantity <= 1}}">-</button>
+        <input 
+          class="quantity-input" 
+          type="number" 
+          value="{{quantity}}" 
+          bindinput="onQuantityInput"
+          max="{{product.stock}}"
+        />
+        <button class="quantity-btn" bindtap="increaseQuantity" disabled="{{quantity >= product.stock}}">+</button>
+      </view>
+    </view>
+    
+    <view class="action-buttons">
+      <button class="add-cart-btn" bindtap="addToCart">加入购物车</button>
+      <button class="buy-now-btn" bindtap="buyNow">立即购买</button>
+    </view>
+  </view>
+</view>
+
+<!-- 加载状态 -->
+<view class="loading-container" wx:if="{{loading}}">
+  <text>加载中...</text>
+</view>
