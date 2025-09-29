@@ -182,7 +182,7 @@ tree -I 'node_modules|.git'
 cd miniprogram-2
 
 # 使用微信开发者工具打开项目
-# 配置 AppID: wx933d2ff5e23e50fb (或使用您自己的 AppID)
+# 配置 AppID (或使用您自己的 AppID)
 ```
 
 #### 3. 后端服务配置
