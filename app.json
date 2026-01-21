@@ -19,15 +19,15 @@
     "list": [
       {
         "pagePath": "pages/index/index",
-        "text": "🏠 首页"
+        "text": "首页"
       },
       {
         "pagePath": "pages/calendar/calendar",
-        "text": "🛡️ 守护侠"
+        "text": "守护侠"
       },
       {
         "pagePath": "pages/my/my",
-        "text": "👤 主页"
+        "text": "我的"
       }
     ]
   }

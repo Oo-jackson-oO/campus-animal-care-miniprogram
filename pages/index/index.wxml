@@ -1,4 +1,10 @@
 <view class="container">
+  <view wx:if="{{loading}}">
+    <skeleton rows="3"></skeleton>
+    <skeleton rows="3"></skeleton>
+    <skeleton rows="3"></skeleton>
+  </view>
+  <view wx:else>
   <!-- 现代公告滚动栏 -->
   <view class="notice-container">
     <view class="notice-header">
@@ -42,10 +48,10 @@
   </view>
 
   <!-- 文创产品（可左右滑动） -->
-  <view class="title">文创产品</view>
-  <scroll-view scroll-x class="products-scroll">
+  <section-title title="文创产品"></section-title>
+  <scroll-view wx:if="{{products.length > 0}}" scroll-x class="products-scroll">
     <view class="product-item" wx:for="{{products}}" wx:key="id" bindtap="onProductTap" data-id="{{item.id}}">
-      <image src="{{item.image}}" mode="widthFix"></image>
+      <image src="{{item.image}}" mode="widthFix" lazy-load="true"></image>
       <view class="product-info">
         <text class="product-name">{{item.name}}</text>
         <view class="product-price">
@@ -59,15 +65,18 @@
       </view>
     </view>
   </scroll-view>
+  <empty-state wx:else text="暂无文创产品" subtext="稍后再来看看吧"></empty-state>
 
   <!-- 动物列表 -->
-  <view class="title">校园动物</view>
-  <view class="animal-list">
+  <section-title title="校园动物"></section-title>
+  <view wx:if="{{animals.length > 0}}" class="animal-list">
     <view wx:for="{{animals}}" wx:key="id" class="animal-card" bindtap="onAnimalTap" data-id="{{item.id}}">
-      <image src="{{item.image}}" mode="widthFix"></image>
+      <image src="{{item.image}}" mode="widthFix" lazy-load="true"></image>
       <view class="animal-info">
         <text>名字：{{item.name}} | 性别：{{item.gender}} | 绝育：{{item.sterilized ? '是' : '否'}}</text>
       </view>
     </view>
+  </view>
+  <empty-state wx:else text="暂无动物信息" subtext="还没有收录到校园动物"></empty-state>
   </view>
 </view>

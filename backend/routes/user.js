@@ -9,6 +9,8 @@ const User = require('../models/User');
 const { userValidation } = require('../middleware/validation');
 const logger = require('../utils/logger');
 
+const userModel = new User();
+
 /**
  * 用户登录/注册
  * POST /api/user/login
@@ -17,7 +19,7 @@ router.post('/login', userValidation.login, async (req, res, next) => {
     try {
         const { openid, nickname, avatar_url } = req.body;
 
-        const user = await User.prototype.loginOrRegister({
+        const user = await userModel.loginOrRegister({
             openid,
             nickname,
             avatar_url
@@ -50,7 +52,7 @@ router.get('/info', async (req, res, next) => {
             });
         }
 
-        const user = await User.prototype.findByOpenid(openid);
+        const user = await userModel.findByOpenid(openid);
 
         if (!user) {
             return res.status(404).json({
@@ -79,7 +81,7 @@ router.put('/info', userValidation.updateInfo, async (req, res, next) => {
     try {
         const { openid, ...updateData } = req.body;
 
-        const result = await User.prototype.updateByOpenid(openid, updateData);
+        const result = await userModel.updateByOpenid(openid, updateData);
 
         if (result.affectedRows === 0) {
             return res.status(404).json({
@@ -90,7 +92,7 @@ router.put('/info', userValidation.updateInfo, async (req, res, next) => {
         }
 
         // 返回更新后的用户信息
-        const updatedUser = await User.prototype.findByOpenid(openid);
+        const updatedUser = await userModel.findByOpenid(openid);
 
         res.json({
             code: 200,
@@ -119,7 +121,7 @@ router.get('/stats/:userId', async (req, res, next) => {
             });
         }
 
-        const stats = await User.prototype.getUserStats(parseInt(userId));
+        const stats = await userModel.getUserStats(parseInt(userId));
 
         if (!stats) {
             return res.status(404).json({
@@ -156,7 +158,7 @@ router.get('/ranking', async (req, res, next) => {
             });
         }
 
-        const ranking = await User.prototype.getUserRanking(parseInt(limit));
+        const ranking = await userModel.getUserRanking(parseInt(limit));
 
         res.json({
             code: 200,
@@ -185,7 +187,7 @@ router.get('/search', async (req, res, next) => {
             });
         }
 
-        const users = await User.prototype.searchUsers(keyword.trim(), {
+        const users = await userModel.searchUsers(keyword.trim(), {
             limit: parseInt(limit),
             offset: parseInt(offset)
         });

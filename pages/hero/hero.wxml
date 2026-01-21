@@ -1,4 +1,9 @@
 <view class="container">
+  <view wx:if="{{loading}}">
+    <skeleton avatar="{{true}}" rows="3"></skeleton>
+    <skeleton rows="3"></skeleton>
+  </view>
+  <view wx:else>
   <!-- 动物基础信息 -->
   <view class="animal-detail">
     <image src="{{animal.image}}" mode="aspectFill" class="animal-image"></image>
@@ -11,17 +16,21 @@
 
   <!-- 讨论区 -->
   <view class="comment-area">
-    <view class="title">讨论区</view>
-    <view class="comment" wx:for="{{comments}}" wx:key="id">
-      <view class="comment-header">
-        <text class="user">{{item.user}}</text>
-        <text class="time">{{item.time}}</text>
+    <section-title title="讨论区"></section-title>
+    <view wx:if="{{comments.length > 0}}">
+      <view class="comment" wx:for="{{comments}}" wx:key="id">
+        <view class="comment-header">
+          <text class="user">{{item.userName}}</text>
+          <text class="time">{{item.displayTime}}</text>
+        </view>
+        <text class="content">{{item.content}}</text>
       </view>
-      <text class="content">{{item.content}}</text>
     </view>
+    <empty-state wx:else text="暂无讨论" subtext="成为第一个留言的人"></empty-state>
     <view class="comment-input">
-      <input type="text" placeholder="说点什么..." bindinput="onCommentInput" value="{{commentContent}}" />
+      <input class="input-modern" type="text" placeholder="说点什么..." bindinput="onCommentInput" value="{{commentContent}}" />
       <button bindtap="submitComment">发布</button>
     </view>
+  </view>
   </view>
 </view>

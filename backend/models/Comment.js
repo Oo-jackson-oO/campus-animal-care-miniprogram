@@ -26,7 +26,13 @@ class Comment extends BaseModel {
                 order = 'DESC'
             } = options;
 
-            const offset = (page - 1) * limit;
+            const safeLimit = Number.isFinite(Number(limit)) ? Math.max(1, Math.min(parseInt(limit), 100)) : 10;
+            const safePage = Number.isFinite(Number(page)) ? Math.max(1, parseInt(page)) : 1;
+            const offset = (safePage - 1) * safeLimit;
+            const safeOffset = Number.isFinite(Number(offset)) ? Math.max(0, parseInt(offset)) : 0;
+            const allowedOrderBy = new Set(['created_at', 'id']);
+            const safeOrderBy = allowedOrderBy.has(orderBy) ? orderBy : 'created_at';
+            const safeOrder = String(order).toUpperCase() === 'ASC' ? 'ASC' : 'DESC';
 
             const sql = `
         SELECT 
@@ -39,11 +45,11 @@ class Comment extends BaseModel {
         LEFT JOIN comments parent ON c.parent_id = parent.id
         LEFT JOIN users parent_user ON parent.user_id = parent_user.id
         WHERE c.animal_id = ? AND c.status = 1
-        ORDER BY c.${orderBy} ${order}
-        LIMIT ? OFFSET ?
+        ORDER BY c.${safeOrderBy} ${safeOrder}
+        LIMIT ${safeLimit} OFFSET ${safeOffset}
       `;
 
-            const comments = await this.rawQuery(sql, [animalId, limit, offset]);
+            const comments = await this.rawQuery(sql, [animalId]);
 
             // 获取总数
             const countSql = `
@@ -59,10 +65,10 @@ class Comment extends BaseModel {
             return {
                 data: comments,
                 pagination: {
-                    page: parseInt(page),
-                    limit: parseInt(limit),
+                    page: parseInt(safePage),
+                    limit: parseInt(safeLimit),
                     total: parseInt(total),
-                    pages: Math.ceil(total / limit)
+                    pages: Math.ceil(total / safeLimit)
                 }
             };
         } catch (error) {

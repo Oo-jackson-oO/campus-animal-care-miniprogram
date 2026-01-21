@@ -9,6 +9,8 @@ const Donation = require('../models/Donation');
 const { donationValidation } = require('../middleware/validation');
 const logger = require('../utils/logger');
 
+const donationModel = new Donation();
+
 /**
  * 获取捐赠项目列表
  * GET /api/donations?page=1&limit=10&status=active
@@ -24,7 +26,7 @@ router.get('/', donationValidation.getList, async (req, res, next) => {
         const conditions = {};
         if (status) conditions.status = status;
 
-        const result = await Donation.prototype.paginate(conditions, {
+        const result = await donationModel.paginate(conditions, {
             page: parseInt(page),
             limit: parseInt(limit),
             orderBy: 'created_at',
@@ -59,7 +61,7 @@ router.get('/:id', async (req, res, next) => {
             });
         }
 
-        const donation = await Donation.prototype.getDonationDetail(parseInt(id));
+        const donation = await donationModel.getDonationDetail(parseInt(id));
 
         if (!donation) {
             return res.status(404).json({
@@ -90,12 +92,12 @@ router.post('/:id/donate', donationValidation.createDonation, async (req, res, n
         const donationData = {
             ...req.body,
             donation_id: parseInt(id),
-            status: 1,
+            status: 'completed',
             created_at: new Date(),
             updated_at: new Date()
         };
 
-        const result = await Donation.prototype.createDonationRecord(donationData);
+        const result = await donationModel.createDonationRecord(donationData);
 
         res.status(201).json({
             code: 201,
@@ -125,7 +127,7 @@ router.get('/user/:userId', async (req, res, next) => {
             });
         }
 
-        const donations = await Donation.prototype.getUserDonations(parseInt(userId), {
+        const donations = await donationModel.getUserDonations(parseInt(userId), {
             page: parseInt(page),
             limit: parseInt(limit)
         });

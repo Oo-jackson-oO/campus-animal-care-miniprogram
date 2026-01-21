@@ -1,0 +1,7 @@
+<view class="sk">
+  <view wx:if="{{avatar}}" class="sk-avatar"></view>
+  <view class="sk-body">
+    <view class="sk-line" wx:for="{{rowArray}}" wx:key="*this"></view>
+  </view>
+</view>
+

@@ -9,6 +9,8 @@ const Notice = require('../models/Notice');
 const { noticeValidation } = require('../middleware/validation');
 const logger = require('../utils/logger');
 
+const noticeModel = new Notice();
+
 /**
  * 获取公告列表
  * GET /api/notices?page=1&limit=10&type=urgent&status=active
@@ -26,7 +28,7 @@ router.get('/', noticeValidation.getList, async (req, res, next) => {
         if (type) conditions.type = type;
         if (status) conditions.status = status;
 
-        const result = await Notice.prototype.paginate(conditions, {
+        const result = await noticeModel.paginate(conditions, {
             page: parseInt(page),
             limit: parseInt(limit),
             orderBy: 'priority',
@@ -61,7 +63,7 @@ router.get('/:id', async (req, res, next) => {
             });
         }
 
-        const notice = await Notice.prototype.findById(parseInt(id));
+        const notice = await noticeModel.findById(parseInt(id));
 
         if (!notice) {
             return res.status(404).json({
@@ -90,13 +92,13 @@ router.post('/', noticeValidation.create, async (req, res, next) => {
     try {
         const noticeData = {
             ...req.body,
-            status: 1,
+            status: 'active',
             created_at: new Date(),
             updated_at: new Date()
         };
 
-        const result = await Notice.prototype.create(noticeData);
-        const newNotice = await Notice.prototype.findById(result.id);
+        const result = await noticeModel.create(noticeData);
+        const newNotice = await noticeModel.findById(result.id);
 
         res.status(201).json({
             code: 201,

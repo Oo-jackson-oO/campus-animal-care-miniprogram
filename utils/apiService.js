@@ -15,6 +15,24 @@ class ApiService {
         this.useLocalData = config.useLocalData; // 是否使用本地数据
     }
 
+    buildQueryString(params = {}) {
+        if (!params || typeof params !== 'object') return '';
+        const parts = [];
+        Object.keys(params).forEach((key) => {
+            const value = params[key];
+            if (value === undefined || value === null || value === '') return;
+            if (Array.isArray(value)) {
+                value.forEach((v) => {
+                    if (v === undefined || v === null || v === '') return;
+                    parts.push(`${encodeURIComponent(key)}=${encodeURIComponent(String(v))}`);
+                });
+                return;
+            }
+            parts.push(`${encodeURIComponent(key)}=${encodeURIComponent(String(value))}`);
+        });
+        return parts.join('&');
+    }
+
     /**
      * 通用HTTP请求方法
      * @param {Object} options 请求选项
@@ -26,7 +44,8 @@ class ApiService {
             method = 'GET',
             data = null,
             header = {},
-            retryCount = 0
+            retryCount = 0,
+            silent = false
         } = options;
 
         // 如果使用本地数据，直接返回模拟数据
@@ -87,7 +106,9 @@ class ApiService {
             }
 
             // 显示错误信息
-            ErrorHandler.showError(errorInfo);
+            if (!silent) {
+                ErrorHandler.showError(errorInfo);
+            }
             throw error;
         }
     }
@@ -316,15 +337,25 @@ class ApiService {
         });
     }
 
+    async wechatLogin(payload) {
+        return this.request({
+            url: '/wechat/login',
+            method: 'POST',
+            data: payload
+        });
+    }
+
     /**
      * 获取用户信息
      * @param {string} openid 用户openid
      * @returns {Promise<any>} 用户信息
      */
     async getUserInfo(openid) {
+        const options = arguments.length > 1 ? arguments[1] : {};
         return this.request({
             url: `/user/info?openid=${openid}`,
-            method: 'GET'
+            method: 'GET',
+            silent: Boolean(options?.silent)
         });
     }
 
@@ -347,9 +378,11 @@ class ApiService {
      * @returns {Promise<any>} 统计信息
      */
     async getUserStats(userId) {
+        const options = arguments.length > 1 ? arguments[1] : {};
         return this.request({
             url: `/user/stats/${userId}`,
-            method: 'GET'
+            method: 'GET',
+            silent: Boolean(options?.silent)
         });
     }
 
@@ -373,7 +406,7 @@ class ApiService {
      * @returns {Promise<any>} 动物列表
      */
     async getAnimals(params = {}) {
-        const queryString = new URLSearchParams(params).toString();
+        const queryString = this.buildQueryString(params);
         return this.request({
             url: `/animals${queryString ? '?' + queryString : ''}`,
             method: 'GET'
@@ -412,7 +445,7 @@ class ApiService {
      */
     async searchAnimals(keyword, options = {}) {
         const params = { keyword, ...options };
-        const queryString = new URLSearchParams(params).toString();
+        const queryString = this.buildQueryString(params);
         return this.request({
             url: `/animals/search?${queryString}`,
             method: 'GET'
@@ -427,7 +460,7 @@ class ApiService {
      * @returns {Promise<any>} 商品列表
      */
     async getProducts(params = {}) {
-        const queryString = new URLSearchParams(params).toString();
+        const queryString = this.buildQueryString(params);
         return this.request({
             url: `/products${queryString ? '?' + queryString : ''}`,
             method: 'GET'
@@ -453,7 +486,7 @@ class ApiService {
      * @returns {Promise<any>} 商品评价
      */
     async getProductReviews(id, params = {}) {
-        const queryString = new URLSearchParams(params).toString();
+        const queryString = this.buildQueryString(params);
         return this.request({
             url: `/products/${id}/reviews${queryString ? '?' + queryString : ''}`,
             method: 'GET'
@@ -482,7 +515,7 @@ class ApiService {
      * @returns {Promise<any>} 捐赠项目列表
      */
     async getDonations(params = {}) {
-        const queryString = new URLSearchParams(params).toString();
+        const queryString = this.buildQueryString(params);
         return this.request({
             url: `/donations${queryString ? '?' + queryString : ''}`,
             method: 'GET'
@@ -515,6 +548,30 @@ class ApiService {
         });
     }
 
+    async createDonationPrepay(id, payload) {
+        return this.request({
+            url: `/pay/donation/${id}/prepay`,
+            method: 'POST',
+            data: payload
+        });
+    }
+
+    async confirmDonationPay(id, payload) {
+        return this.request({
+            url: `/pay/donation/${id}/confirm`,
+            method: 'POST',
+            data: payload
+        });
+    }
+
+    async createOrderPrepay(payload) {
+        return this.request({
+            url: `/pay/order/prepay`,
+            method: 'POST',
+            data: payload
+        });
+    }
+
     /**
      * 获取用户捐赠记录
      * @param {number} userId 用户ID
@@ -522,7 +579,7 @@ class ApiService {
      * @returns {Promise<any>} 捐赠记录
      */
     async getUserDonations(userId, params = {}) {
-        const queryString = new URLSearchParams(params).toString();
+        const queryString = this.buildQueryString(params);
         return this.request({
             url: `/donations/user/${userId}${queryString ? '?' + queryString : ''}`,
             method: 'GET'
@@ -538,7 +595,7 @@ class ApiService {
      * @returns {Promise<any>} 评论列表
      */
     async getAnimalComments(animalId, params = {}) {
-        const queryString = new URLSearchParams(params).toString();
+        const queryString = this.buildQueryString(params);
         return this.request({
             url: `/comments/animal/${animalId}${queryString ? '?' + queryString : ''}`,
             method: 'GET'
@@ -581,7 +638,7 @@ class ApiService {
      * @returns {Promise<any>} 公告列表
      */
     async getNotices(params = {}) {
-        const queryString = new URLSearchParams(params).toString();
+        const queryString = this.buildQueryString(params);
         return this.request({
             url: `/notices${queryString ? '?' + queryString : ''}`,
             method: 'GET'

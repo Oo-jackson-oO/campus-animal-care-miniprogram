@@ -1,0 +1,44 @@
+.st {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  padding: 8rpx 0 16rpx;
+}
+
+.st-left {
+  display: flex;
+  flex-direction: column;
+  gap: 6rpx;
+}
+
+.st-title {
+  font-size: 34rpx;
+  font-weight: 700;
+  color: var(--gray-900);
+  line-height: 1.2;
+}
+
+.st-subtitle {
+  font-size: 24rpx;
+  color: var(--gray-600);
+  line-height: 1.2;
+}
+
+.st-right {
+  display: flex;
+  align-items: center;
+  gap: 6rpx;
+  padding-bottom: 2rpx;
+}
+
+.st-right-text {
+  font-size: 24rpx;
+  color: var(--gray-600);
+}
+
+.st-arrow {
+  font-size: 28rpx;
+  color: var(--gray-500);
+  line-height: 1;
+}
+

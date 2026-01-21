@@ -1,191 +1,86 @@
 const logger = require('../../utils/logger');
 const performanceMonitor = require('../../utils/performance');
+const dataService = require('../../utils/dataService');
 
 Page({
   data: {
-    currentDate: null,      // 当前选择的日期
+    currentDateStr: '',     // 当前日期（YYYY-MM-DD）
     weekDays: [],           // 一周日期数据
     currentMonth: 8,        // 当前月份（1-12）
     currentWeek: 1,         // 当前周数（1-5）
-    selectedDate: null,     // 选中的日期
-    animals: [
-      {
-        id: 1,
-        name: "小橘",
-        need: "疫苗接种",
-        image: "/image/dog.png",
-        donateCurrent: 150,
-        donateTarget: 300,
-        dates: [] // 动态生成日期
-      },
-      {
-        id: 2,
-        name: "雪球",
-        need: "购买专用猫粮",
-        image: "/image/dog.png",
-        donateCurrent: 180,
-        donateTarget: 200,
-        dates: [] // 动态生成日期
-      },
-      {
-        id: 3,
-        name: "奥利奥",
-        need: "绝育手术",
-        image: "/image/dog.png",
-        donateCurrent: 300,
-        donateTarget: 600,
-        dates: [] // 动态生成日期
-      },
-      {
-        id: 4,
-        name: "小橘",
-        need: "定期体检",
-        image: "/image/dog.png",
-        donateCurrent: 80,
-        donateTarget: 150,
-        dates: [] // 动态生成日期
-      },
-      {
-        id: 5,
-        name: "小白",
-        need: "驱虫治疗",
-        image: "/image/dog.png",
-        donateCurrent: 120,
-        donateTarget: 250,
-        dates: [] // 动态生成日期
-      },
-      {
-        id: 6,
-        name: "咪咪",
-        need: "眼部护理",
-        image: "/image/dog.png",
-        donateCurrent: 90,
-        donateTarget: 180,
-        dates: [] // 动态生成日期
-      },
-      {
-        id: 7,
-        name: "大黄",
-        need: "腿部康复",
-        image: "/image/dog.png",
-        donateCurrent: 200,
-        donateTarget: 400,
-        dates: [] // 动态生成日期
-      },
-      {
-        id: 8,
-        name: "小花",
-        need: "营养补充",
-        image: "/image/dog.png",
-        donateCurrent: 60,
-        donateTarget: 120,
-        dates: [] // 动态生成日期
-      },
-      {
-        id: 9,
-        name: "小黑",
-        need: "皮肤病治疗",
-        image: "/image/dog.png",
-        donateCurrent: 150,
-        donateTarget: 300,
-        dates: [] // 动态生成日期
-      },
-      {
-        id: 10,
-        name: "小灰",
-        need: "牙齿清洁",
-        image: "/image/dog.png",
-        donateCurrent: 80,
-        donateTarget: 150,
-        dates: [] // 动态生成日期
-      },
-      {
-        id: 11,
-        name: "小橙",
-        need: "耳道清洁",
-        image: "/image/dog.png",
-        donateCurrent: 70,
-        donateTarget: 130,
-        dates: [] // 动态生成日期
-      },
-      {
-        id: 12,
-        name: "小蓝",
-        need: "关节保健",
-        image: "/image/dog.png",
-        donateCurrent: 180,
-        donateTarget: 350,
-        dates: [] // 动态生成日期
-      }
-    ],
+    selectedDateStr: '',    // 选中的日期（YYYY-MM-DD）
+    animals: [],
     donateInput: {},
-    filteredAnimals: [] // 根据选中日期过滤的动物列表
+    filteredAnimals: [], // 根据选中日期过滤的动物列表
+    loading: true
   },
 
-  onLoad() {
+  async onLoad() {
     // 使用当前日期作为初始日期
     const initialDate = new Date();
     logger.pageLifecycle('守护侠页面', '加载完成');
     logger.debug('初始日期', initialDate);
 
+    this._currentDate = initialDate;
+    const initialDateStr = this.formatDate(initialDate);
     this.setData({
-      currentDate: initialDate,
-      selectedDate: initialDate
+      currentDateStr: initialDateStr,
+      selectedDateStr: initialDateStr
     });
 
     // 初始化数据，避免重复计算
     this.initializeData();
+    await this.loadDonationProjects();
   },
 
   // 初始化数据方法
   initializeData() {
-    this.generateAnimalDates();
     this.calculateWeekDays();
     this.updateFilteredAnimals();
   },
 
-  // 动态生成动物事项的日期
-  generateAnimalDates() {
-    const animals = this.data.animals.map((animal, index) => {
-      const dates = [];
-      const today = new Date();
-
-      // 为每个动物生成未来几周的日期
-      for (let week = 0; week < 4; week++) {
-        for (let day = 0; day < 7; day++) {
-          const date = new Date(today);
-          date.setDate(today.getDate() + week * 7 + day + index * 2); // 错开不同动物的日期
-          dates.push(this.formatDate(date));
-        }
-      }
-
-      return {
-        ...animal,
-        dates: dates
-      };
-    });
-
-    this.setData({ animals });
+  async loadDonationProjects() {
+    this.setData({ loading: true });
+    try {
+      const donations = await dataService.getDonations({ limit: 100 });
+      const animals = donations.map((d) => ({
+        id: d.id,
+        name: d.title,
+        need: d.description,
+        image: d.image,
+        donateCurrent: d.currentAmount,
+        donateTarget: d.targetAmount,
+        startDate: d.startDate,
+        endDate: d.endDate
+      }));
+      this.setData({ animals, loading: false }, () => {
+        this.updateFilteredAnimals();
+      });
+    } catch (error) {
+      console.error('加载捐赠项目失败:', error);
+      this.setData({ animals: [], filteredAnimals: [], loading: false });
+    }
   },
 
   // 计算一周日期（周一为起始）
   calculateWeekDays() {
     return performanceMonitor.monitor('calculateWeekDays', () => {
-      if (!this.data.currentDate) {
+      if (!this._currentDate) {
         console.error('currentDate 未初始化');
         return;
       }
 
-      const currentDate = new Date(this.data.currentDate);
+      const currentDate = new Date(this._currentDate);
+      const currentDateStr = this.formatDate(currentDate);
+      const cacheKey = `${currentDateStr}|${this.data.selectedDateStr || ''}`;
 
       // 防止重复计算
-      if (this._lastCalculatedDate &&
-        this._lastCalculatedDate.getTime() === currentDate.getTime()) {
+      if (this._lastCalculatedKey && this._lastCalculatedKey === cacheKey) {
         return;
       }
 
       logger.debug('计算周日期，当前日期', currentDate);
-      this._lastCalculatedDate = new Date(currentDate);
+      this._lastCalculatedKey = cacheKey;
 
       if (isNaN(currentDate.getTime())) {
         console.error('currentDate 是无效日期');
@@ -200,15 +95,19 @@ Page({
       );
 
       const weekDays = [];
+      const todayStr = this.formatDate(new Date());
+      const selectedDateStr = this.data.selectedDateStr;
       for (let i = 0; i < 7; i++) {
         const date = new Date(firstDayOfWeek);
         date.setDate(firstDayOfWeek.getDate() + i);
+        const dateStr = this.formatDate(date);
         weekDays.push({
-          date: date,
-          weekDay: ["日", "一", "二", "三", "四", "五", "六"][date.getDay()],
+          dateStr,
+          dayNum: date.getDate(),
+          weekDay: ['日', '一', '二', '三', '四', '五', '六'][date.getDay()],
           isCurrentMonth: date.getMonth() === currentDate.getMonth(),
-          isToday: this.isToday(date),
-          isSelected: this.isSelectedDate(date)
+          isToday: dateStr === todayStr,
+          isSelected: dateStr === selectedDateStr
         });
       }
 
@@ -221,7 +120,8 @@ Page({
       this.setData({
         weekDays,
         currentMonth: month,
-        currentWeek: week
+        currentWeek: week,
+        currentDateStr: currentDateStr
       });
 
       logger.debug('设置数据完成', { month, week });
@@ -246,38 +146,20 @@ Page({
     return Math.ceil((dayOfMonth + offset) / 7);
   },
 
-  // 判断是否为今天
-  isToday(date) {
-    if (isNaN(date.getTime())) return false;
-    const today = new Date();
-    return date.getDate() === today.getDate() &&
-      date.getMonth() === today.getMonth() &&
-      date.getFullYear() === today.getFullYear();
-  },
-
-  // 判断是否为选中日期
-  isSelectedDate(date) {
-    if (!this.data.selectedDate || isNaN(date.getTime())) return false;
-    const selected = this.data.selectedDate;
-    if (isNaN(selected.getTime())) return false;
-
-    return date.getDate() === selected.getDate() &&
-      date.getMonth() === selected.getMonth() &&
-      date.getFullYear() === selected.getFullYear();
-  },
-
   // 上一周
   prevWeek() {
-    if (!this.data.currentDate) return;
+    if (!this._currentDate) return;
 
-    const currentDate = new Date(this.data.currentDate);
+    const currentDate = new Date(this._currentDate);
     currentDate.setDate(currentDate.getDate() - 7);
 
     console.log('切换到上一周:', currentDate);
 
+    this._currentDate = currentDate;
+    const currentDateStr = this.formatDate(currentDate);
     this.setData({
-      currentDate: currentDate,
-      selectedDate: currentDate
+      currentDateStr: currentDateStr,
+      selectedDateStr: currentDateStr
     }, () => {
       this.calculateWeekDays();
       this.updateFilteredAnimals();
@@ -286,16 +168,18 @@ Page({
 
   // 下一周
   nextWeek() {
-    if (!this.data.currentDate) return;
+    if (!this._currentDate) return;
 
-    const currentDate = new Date(this.data.currentDate);
+    const currentDate = new Date(this._currentDate);
     currentDate.setDate(currentDate.getDate() + 7);
 
     console.log('切换到下一周:', currentDate);
 
+    this._currentDate = currentDate;
+    const currentDateStr = this.formatDate(currentDate);
     this.setData({
-      currentDate: currentDate,
-      selectedDate: currentDate
+      currentDateStr: currentDateStr,
+      selectedDateStr: currentDateStr
     }, () => {
       this.calculateWeekDays();
       this.updateFilteredAnimals();
@@ -303,36 +187,53 @@ Page({
   },
 
   // 选择日期
-  selectDate(date) {
-    if (isNaN(date.getTime())) return;
-
-    this.setData({ selectedDate: date });
-    // 选择日期时不需要重新计算周日期，只需要更新过滤的动物
-    this.updateFilteredAnimals();
+  selectDate(dateStr) {
+    if (!dateStr) return;
+    this.setData({ selectedDateStr: dateStr }, () => {
+      this.calculateWeekDays();
+      this.updateFilteredAnimals();
+    });
   },
 
   // 点击日期项
   onDateTap(e) {
     const { index } = e.currentTarget.dataset;
     if (index >= 0 && index < this.data.weekDays.length) {
-      const selectedDate = this.data.weekDays[index].date;
-      this.selectDate(selectedDate);
+      const selectedDateStr = this.data.weekDays[index].dateStr;
+      this.selectDate(selectedDateStr);
     }
+  },
+
+  safePercent(current, target) {
+    const currentNumber = Number(current);
+    const targetNumber = Number(target);
+    if (!targetNumber || isNaN(currentNumber) || isNaN(targetNumber)) return 0;
+    return Math.max(0, Math.min(100, (currentNumber / targetNumber) * 100));
   },
 
   // 根据选中日期过滤动物事项
   updateFilteredAnimals() {
-    if (!this.data.selectedDate || isNaN(this.data.selectedDate.getTime())) {
-      this.setData({ filteredAnimals: this.data.animals });
+    const selectedDateStr = this.data.selectedDateStr;
+    if (!selectedDateStr) {
+      const normalized = this.data.animals.map(item => ({
+        ...item,
+        percent: this.safePercent(item.donateCurrent, item.donateTarget)
+      }));
+      this.setData({ filteredAnimals: normalized });
       return;
     }
 
-    const selectedDateStr = this.formatDate(this.data.selectedDate);
-    const filtered = this.data.animals.filter(animal =>
-      animal.dates.includes(selectedDateStr)
-    );
+    const filtered = this.data.animals.filter((item) => {
+      if (!item.startDate || !item.endDate) return true;
+      return selectedDateStr >= item.startDate && selectedDateStr <= item.endDate;
+    });
 
-    this.setData({ filteredAnimals: filtered });
+    const normalized = filtered.map(item => ({
+      ...item,
+      percent: this.safePercent(item.donateCurrent, item.donateTarget)
+    }));
+
+    this.setData({ filteredAnimals: normalized });
     logger.debug('过滤后的事项数量', filtered.length);
   },
 
@@ -362,27 +263,26 @@ Page({
       wx.showToast({ title: '请输入有效金额', icon: 'none' });
       return;
     }
-
-    const animals = this.data.animals.map(item => {
-      if (item.id === id) {
-        item.donateCurrent = Math.min(item.donateCurrent + Number(amount), item.donateTarget);
-      }
-      return item;
-    });
-
-    this.setData({
-      animals,
-      [`donateInput[${id}]`]: ''
-    });
-
-    this.updateFilteredAnimals();
-
-    wx.showToast({ title: '捐款成功' });
+    wx.showLoading({ title: '处理中...' });
+    dataService.updateDonationAmount(id, amount)
+      .then(() => {
+        wx.hideLoading();
+        this.setData({ [`donateInput[${id}]`]: '' });
+        wx.showToast({ title: '捐款成功' });
+        return this.loadDonationProjects();
+      })
+      .catch((error) => {
+        wx.hideLoading();
+        console.error('捐款失败:', error);
+        wx.showToast({ title: '捐款失败', icon: 'none' });
+      });
   },
 
   // 页面卸载时清理
   onUnload() {
     // 清理缓存，防止内存泄漏
-    this._lastCalculatedDate = null;
+    this._lastCalculatedDateStr = null;
+    this._lastCalculatedKey = null;
+    this._currentDate = null;
   }
 });

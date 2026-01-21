@@ -1,0 +1,4 @@
+<view class="app-card {{extClass}}">
+  <slot></slot>
+</view>
+

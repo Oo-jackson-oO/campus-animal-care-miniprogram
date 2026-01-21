@@ -3,7 +3,7 @@
   <view class="product-images">
     <swiper class="image-swiper" indicator-dots="false" autoplay="false" circular="true" bindchange="onSwiperChange">
       <swiper-item wx:for="{{product.images}}" wx:key="index" bindtap="previewImage" data-index="{{index}}">
-        <image src="{{item}}" mode="aspectFill" class="product-image"></image>
+        <image src="{{item}}" mode="aspectFill" class="product-image" lazy-load="true"></image>
       </swiper-item>
     </swiper>
     
@@ -42,7 +42,7 @@
 
   <!-- 商品特色 -->
   <view class="features-section">
-    <view class="section-title">商品特色</view>
+    <section-title title="商品特色"></section-title>
     <view class="features-list">
       <view class="feature-item" wx:for="{{product.features}}" wx:key="index">
         <text class="feature-icon">✓</text>
@@ -53,7 +53,7 @@
 
   <!-- 商品详情 -->
   <view class="details-section">
-    <view class="section-title">商品详情</view>
+    <section-title title="商品详情"></section-title>
     <view class="details-content">
       <text class="details-text">{{product.details}}</text>
     </view>
@@ -61,15 +61,12 @@
 
   <!-- 用户评价 -->
   <view class="reviews-section">
-    <view class="section-title">
-      <text>用户评价</text>
-      <text class="review-count">({{reviews.length}}条)</text>
-    </view>
+    <section-title title="用户评价" rightText="{{reviewCountText}}"></section-title>
     
     <view class="reviews-list" wx:if="{{reviews.length > 0}}">
       <view class="review-item" wx:for="{{reviews}}" wx:key="id">
         <view class="review-header">
-          <image src="{{item.avatar}}" class="user-avatar"></image>
+          <image src="{{item.avatar}}" class="user-avatar" lazy-load="true"></image>
           <view class="user-info">
             <text class="user-name">{{item.userName}}</text>
             <view class="review-rating">
@@ -85,8 +82,10 @@
             class="review-image" 
             wx:for="{{item.images}}" 
             wx:key="*this"
-            bindtap="previewImage"
-            data-index="{{index}}"
+            bindtap="previewReviewImage"
+            data-current="{{img}}"
+            data-urls="{{item.images}}"
+            lazy-load="true"
           ></image>
         </view>
         <view class="review-footer">
@@ -95,9 +94,7 @@
       </view>
     </view>
     
-    <view class="no-reviews" wx:else>
-      <text>暂无评价</text>
-    </view>
+    <empty-state wx:else text="暂无评价" subtext="期待你的第一条反馈"></empty-state>
   </view>
 
   <!-- 底部操作栏 -->
@@ -126,5 +123,6 @@
 
 <!-- 加载状态 -->
 <view class="loading-container" wx:if="{{loading}}">
-  <text>加载中...</text>
+  <skeleton rows="4"></skeleton>
+  <skeleton rows="4"></skeleton>
 </view>

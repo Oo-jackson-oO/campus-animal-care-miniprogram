@@ -1,8 +1,8 @@
 <view class="container">
   <!-- 用户信息 -->
   <view class="user-info">
-    <image src="/image/dog.png" mode="aspectFill" class="user-avatar"></image>
-    <text class="nickname">爱心使者</text>
+    <image src="{{userAvatar}}" mode="aspectFill" class="user-avatar" lazy-load="true"></image>
+    <text class="nickname">{{userName}}</text>
     <view class="stats">
       <view class="stat-item">
         <text class="stat-label">本周募捐</text>
@@ -17,33 +17,33 @@
 
   <!-- 收藏动物 -->
   <view class="favorite">
-    <view class="section-title">收藏的动物</view>
-    <view class="animal-card" wx:for="{{favoriteAnimals}}" wx:key="id" bindtap="onFavoriteTap" data-id="{{item.id}}">
-      <image src="{{item.image}}" mode="aspectFill" class="animal-avatar"></image>
-      <view class="animal-info">
-        <text class="animal-name">{{item.name}}</text>
-        <text class="animal-desc">{{item.description}}</text>
+    <section-title title="收藏的动物"></section-title>
+    <view wx:if="{{favoriteAnimals.length > 0}}">
+      <view class="animal-card" wx:for="{{favoriteAnimals}}" wx:key="id" bindtap="onFavoriteTap" data-id="{{item.id}}">
+        <image src="{{item.image}}" mode="aspectFill" class="animal-avatar" lazy-load="true"></image>
+        <view class="animal-info">
+          <text class="animal-name">{{item.name}}</text>
+          <text class="animal-desc">{{item.description}}</text>
+        </view>
       </view>
     </view>
+    <empty-state wx:else text="暂无收藏" subtext="在首页点击动物卡片即可查看详情"></empty-state>
   </view>
 
   <!-- 社区排名 -->
   <view class="ranking">
-    <view class="section-title">
-      <text class="medal-icon">🏅</text>
-      社区排名
-    </view>
+    <section-title title="社区排名"></section-title>
     <!-- 自己的排名（固定顶部） -->
     <view class="my-rank" id="myRank">
       <text class="rank-number">{{myRank}}</text>
-      <image src="/image/dog.png" mode="aspectFill" class="rank-avatar"></image>
-      <text class="rank-name">爱心使者</text>
+      <image src="{{userAvatar}}" mode="aspectFill" class="rank-avatar" lazy-load="true"></image>
+      <text class="rank-name">{{userName}}</text>
       <text class="rank-amount">¥{{totalDonate}}</text>
     </view>
     <!-- 其他用户排名 -->
     <view class="other-rank" wx:for="{{otherRanks}}" wx:key="index">
       <text class="rank-number">{{index+1}}</text>
-      <image src="/image/dog.png" mode="aspectFill" class="rank-avatar"></image>
+      <image src="/image/dog.png" mode="aspectFill" class="rank-avatar" lazy-load="true"></image>
       <text class="rank-name">{{item.name}}</text>
       <text class="rank-amount">¥{{item.amount}}</text>
     </view>

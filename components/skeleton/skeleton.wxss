@@ -1,0 +1,38 @@
+.sk {
+  display: flex;
+  gap: 16rpx;
+  padding: 20rpx;
+}
+
+.sk-avatar {
+  width: 72rpx;
+  height: 72rpx;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.06);
+}
+
+.sk-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 14rpx;
+}
+
+.sk-line {
+  height: 22rpx;
+  border-radius: 12rpx;
+  background: rgba(0, 0, 0, 0.06);
+}
+
+.sk-line:nth-child(1) {
+  width: 70%;
+}
+
+.sk-line:nth-child(2) {
+  width: 90%;
+}
+
+.sk-line:nth-child(3) {
+  width: 60%;
+}
+

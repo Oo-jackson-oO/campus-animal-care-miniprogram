@@ -74,7 +74,13 @@ class Product extends BaseModel {
                 order = 'DESC'
             } = options;
 
-            const offset = (page - 1) * limit;
+            const safeLimit = Number.isFinite(Number(limit)) ? Math.max(1, Math.min(parseInt(limit), 100)) : 10;
+            const safePage = Number.isFinite(Number(page)) ? Math.max(1, parseInt(page)) : 1;
+            const offset = (safePage - 1) * safeLimit;
+            const safeOffset = Number.isFinite(Number(offset)) ? Math.max(0, parseInt(offset)) : 0;
+            const allowedOrderBy = new Set(['created_at', 'id', 'rating']);
+            const safeOrderBy = allowedOrderBy.has(orderBy) ? orderBy : 'created_at';
+            const safeOrder = String(order).toUpperCase() === 'ASC' ? 'ASC' : 'DESC';
 
             const sql = `
         SELECT 
@@ -84,11 +90,11 @@ class Product extends BaseModel {
         FROM product_reviews pr
         LEFT JOIN users u ON pr.user_id = u.id
         WHERE pr.product_id = ? AND pr.status = 1
-        ORDER BY pr.${orderBy} ${order}
-        LIMIT ? OFFSET ?
+        ORDER BY pr.${safeOrderBy} ${safeOrder}
+        LIMIT ${safeLimit} OFFSET ${safeOffset}
       `;
 
-            const reviews = await this.rawQuery(sql, [productId, limit, offset]);
+            const reviews = await this.rawQuery(sql, [productId]);
 
             // 获取总数
             const countSql = `
@@ -104,10 +110,10 @@ class Product extends BaseModel {
             return {
                 data: reviews,
                 pagination: {
-                    page: parseInt(page),
-                    limit: parseInt(limit),
+                    page: parseInt(safePage),
+                    limit: parseInt(safeLimit),
                     total: parseInt(total),
-                    pages: Math.ceil(total / limit)
+                    pages: Math.ceil(total / safeLimit)
                 }
             };
         } catch (error) {
@@ -221,6 +227,8 @@ class Product extends BaseModel {
     async searchProducts(keyword, options = {}) {
         try {
             const { limit = 20, offset = 0 } = options;
+            const safeLimit = Number.isFinite(Number(limit)) ? Math.max(1, Math.min(parseInt(limit), 100)) : 20;
+            const safeOffset = Number.isFinite(Number(offset)) ? Math.max(0, parseInt(offset)) : 0;
 
             const sql = `
         SELECT 
@@ -240,11 +248,11 @@ class Product extends BaseModel {
         WHERE p.status = 1 
         AND (p.name LIKE ? OR p.description LIKE ? OR p.category LIKE ?)
         ORDER BY p.created_at DESC
-        LIMIT ? OFFSET ?
+        LIMIT ${safeLimit} OFFSET ${safeOffset}
       `;
 
             const searchPattern = `%${keyword}%`;
-            const results = await this.rawQuery(sql, [searchPattern, searchPattern, searchPattern, limit, offset]);
+            const results = await this.rawQuery(sql, [searchPattern, searchPattern, searchPattern]);
 
             logger.database('SEARCH', this.tableName, `搜索关键词: ${keyword}`);
             return results;

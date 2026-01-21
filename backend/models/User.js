@@ -129,6 +129,7 @@ class User extends BaseModel {
           u.last_login_at,
           COALESCE(donation_stats.total_donations, 0) as total_donations,
           COALESCE(donation_stats.total_amount, 0) as total_amount,
+          COALESCE(donation_week.week_amount, 0) as week_amount,
           COALESCE(order_stats.total_orders, 0) as total_orders,
           COALESCE(order_stats.total_spent, 0) as total_spent,
           COALESCE(comment_stats.total_comments, 0) as total_comments
@@ -139,9 +140,17 @@ class User extends BaseModel {
             COUNT(*) as total_donations,
             SUM(amount) as total_amount
           FROM donation_records 
-          WHERE status = 1
+          WHERE status = 'completed'
           GROUP BY user_id
         ) donation_stats ON u.id = donation_stats.user_id
+        LEFT JOIN (
+          SELECT
+            user_id,
+            SUM(amount) as week_amount
+          FROM donation_records
+          WHERE status = 'completed' AND created_at >= DATE_SUB(NOW(), INTERVAL 7 DAY)
+          GROUP BY user_id
+        ) donation_week ON u.id = donation_week.user_id
         LEFT JOIN (
           SELECT 
             user_id,
@@ -179,28 +188,30 @@ class User extends BaseModel {
      */
     async getUserRanking(limit = 10) {
         try {
-            const ranking = await this.rawQuery(`
+            const safeLimit = Number.isFinite(Number(limit)) ? Math.max(1, Math.min(parseInt(limit), 100)) : 10;
+            const ranking = await this.rawQuery(
+                `
         SELECT 
           u.id,
           u.nickname,
           u.avatar_url,
-          COALESCE(donation_stats.total_amount, 0) as total_donations,
-          ROW_NUMBER() OVER (ORDER BY COALESCE(donation_stats.total_amount, 0) DESC) as rank
+          COALESCE(donation_stats.total_amount, 0) as total_donations
         FROM users u
         LEFT JOIN (
           SELECT 
             user_id,
             SUM(amount) as total_amount
           FROM donation_records 
-          WHERE status = 1
+          WHERE status = 'completed'
           GROUP BY user_id
         ) donation_stats ON u.id = donation_stats.user_id
         WHERE u.status = 1
         ORDER BY total_donations DESC
-        LIMIT ?
-      `, [limit]);
+        LIMIT ${safeLimit}
+      `
+            );
 
-            return ranking;
+            return ranking.map((row, index) => ({ ...row, rank: index + 1 }));
         } catch (error) {
             logger.error('获取用户排名失败', {
                 limit,
@@ -219,6 +230,8 @@ class User extends BaseModel {
     async searchUsers(keyword, options = {}) {
         try {
             const { limit = 20, offset = 0 } = options;
+            const safeLimit = Number.isFinite(Number(limit)) ? Math.max(1, Math.min(parseInt(limit), 100)) : 20;
+            const safeOffset = Number.isFinite(Number(offset)) ? Math.max(0, parseInt(offset)) : 0;
 
             const sql = `
         SELECT id, nickname, avatar_url, created_at
@@ -226,11 +239,11 @@ class User extends BaseModel {
         WHERE status = 1 
         AND (nickname LIKE ? OR openid LIKE ?)
         ORDER BY created_at DESC
-        LIMIT ? OFFSET ?
+        LIMIT ${safeLimit} OFFSET ${safeOffset}
       `;
 
             const searchPattern = `%${keyword}%`;
-            const results = await this.rawQuery(sql, [searchPattern, searchPattern, limit, offset]);
+            const results = await this.rawQuery(sql, [searchPattern, searchPattern]);
 
             logger.database('SEARCH', this.tableName, `搜索关键词: ${keyword}`);
             return results;

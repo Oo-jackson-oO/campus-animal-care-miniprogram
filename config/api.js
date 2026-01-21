@@ -5,12 +5,12 @@
 
 module.exports = {
     // API基础配置
-    baseURL: 'https://your-api-domain.com/api', // 替换为实际的API域名
+    baseURL: 'http://127.0.0.1:3000/api',
     timeout: 30000, // 30秒超时
     retryAttempts: 3, // 重试次数
 
     // 数据源配置
-    useLocalData: true, // 是否使用本地数据（开发阶段设为true，生产环境设为false）
+    useLocalData: false,
 
     // 请求配置
     request: {

@@ -102,9 +102,15 @@ class Server {
         // 请求时间记录
         this.app.use((req, res, next) => {
             const start = Date.now();
-            res.on('finish', () => {
+            const originalWriteHead = res.writeHead;
+            res.writeHead = function (...args) {
                 const duration = Date.now() - start;
-                res.set('X-Response-Time', `${duration}ms`);
+                if (!res.headersSent && !res.getHeader('X-Response-Time')) {
+                    res.setHeader('X-Response-Time', `${duration}ms`);
+                }
+                return originalWriteHead.apply(this, args);
+            };
+            res.on('finish', () => {
                 logger.response(req, res);
             });
             next();

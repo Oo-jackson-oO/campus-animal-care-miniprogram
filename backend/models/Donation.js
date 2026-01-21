@@ -8,7 +8,11 @@ const logger = require('../utils/logger');
 
 class Donation extends BaseModel {
     constructor() {
-        super('donations');
+        super('donations', {
+            activeCondition: `status IN (?, ?)`,
+            activeParams: ['active', 'completed'],
+            inactiveValue: 'cancelled'
+        });
     }
 
     /**
@@ -37,10 +41,10 @@ class Donation extends BaseModel {
             SUM(amount) as total_amount,
             COUNT(DISTINCT user_id) as donor_count
           FROM donation_records 
-          WHERE status = 1
+          WHERE status = 'completed'
           GROUP BY donation_id
         ) donation_stats ON d.id = donation_stats.donation_id
-        WHERE d.id = ? AND d.status = 1
+        WHERE d.id = ? AND d.status IN ('active', 'completed')
       `;
 
             const results = await this.rawQuery(sql, [id]);
@@ -76,8 +80,7 @@ class Donation extends BaseModel {
                 donationData.updated_at
             ]);
 
-            // 更新捐赠项目金额
-            await this.updateDonationAmount(donationData.donation_id, donationData.amount);
+            await this.updateDonationStatusIfReached(donationData.donation_id);
 
             logger.database('INSERT', 'donation_records', `创建捐赠记录，项目ID: ${donationData.donation_id}`);
 
@@ -126,6 +129,13 @@ class Donation extends BaseModel {
         }
     }
 
+    async updateDonationStatusIfReached(donationId) {
+        const donation = await this.findById(donationId);
+        if (donation && donation.current_amount >= donation.target_amount && donation.status !== 'completed') {
+            await this.update(donationId, { status: 'completed' });
+        }
+    }
+
     /**
      * 获取用户捐赠记录
      * @param {number} userId 用户ID
@@ -141,7 +151,13 @@ class Donation extends BaseModel {
                 order = 'DESC'
             } = options;
 
-            const offset = (page - 1) * limit;
+            const safeLimit = Number.isFinite(Number(limit)) ? Math.max(1, Math.min(parseInt(limit), 100)) : 10;
+            const safePage = Number.isFinite(Number(page)) ? Math.max(1, parseInt(page)) : 1;
+            const offset = (safePage - 1) * safeLimit;
+            const safeOffset = Number.isFinite(Number(offset)) ? Math.max(0, parseInt(offset)) : 0;
+            const allowedOrderBy = new Set(['created_at', 'id', 'amount']);
+            const safeOrderBy = allowedOrderBy.has(orderBy) ? orderBy : 'created_at';
+            const safeOrder = String(order).toUpperCase() === 'ASC' ? 'ASC' : 'DESC';
 
             const sql = `
         SELECT 
@@ -153,18 +169,18 @@ class Donation extends BaseModel {
         FROM donation_records dr
         LEFT JOIN donations d ON dr.donation_id = d.id
         LEFT JOIN animals a ON d.animal_id = a.id
-        WHERE dr.user_id = ? AND dr.status = 1
-        ORDER BY dr.${orderBy} ${order}
-        LIMIT ? OFFSET ?
+        WHERE dr.user_id = ? AND dr.status = 'completed'
+        ORDER BY dr.${safeOrderBy} ${safeOrder}
+        LIMIT ${safeLimit} OFFSET ${safeOffset}
       `;
 
-            const donations = await this.rawQuery(sql, [userId, limit, offset]);
+            const donations = await this.rawQuery(sql, [userId]);
 
             // 获取总数
             const countSql = `
         SELECT COUNT(*) as total
         FROM donation_records 
-        WHERE user_id = ? AND status = 1
+        WHERE user_id = ? AND status = 'completed'
       `;
             const countResult = await this.rawQuery(countSql, [userId]);
             const total = countResult[0].total;
@@ -174,10 +190,10 @@ class Donation extends BaseModel {
             return {
                 data: donations,
                 pagination: {
-                    page: parseInt(page),
-                    limit: parseInt(limit),
+                    page: parseInt(safePage),
+                    limit: parseInt(safeLimit),
                     total: parseInt(total),
-                    pages: Math.ceil(total / limit)
+                    pages: Math.ceil(total / safeLimit)
                 }
             };
         } catch (error) {
@@ -203,7 +219,7 @@ class Donation extends BaseModel {
           AVG(current_amount) as avg_amount,
           COUNT(DISTINCT created_by) as total_creators
         FROM donations 
-        WHERE status = 1
+        WHERE status IN ('active', 'completed')
       `);
 
             return stats[0];

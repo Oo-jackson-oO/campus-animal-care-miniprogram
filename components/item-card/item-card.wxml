@@ -1,0 +1,19 @@
+<view class="ic ic-{{kind}}" bindtap="onTap">
+  <image class="ic-image" src="{{image}}" mode="aspectFill" lazy-load="true"></image>
+  <view class="ic-content">
+    <text class="ic-title">{{title}}</text>
+    <text wx:if="{{desc}}" class="ic-desc">{{desc}}</text>
+
+    <view wx:if="{{kind === 'product'}}" class="ic-product-meta">
+      <view class="ic-price">
+        <text class="ic-price-current">¥{{price}}</text>
+        <text wx:if="{{originalPrice && originalPrice > price}}" class="ic-price-origin">¥{{originalPrice}}</text>
+      </view>
+      <view class="ic-tags">
+        <text wx:if="{{rating}}" class="ic-tag">★ {{rating}}</text>
+        <text wx:if="{{sales}}" class="ic-tag">已售{{sales}}</text>
+      </view>
+    </view>
+  </view>
+</view>
+

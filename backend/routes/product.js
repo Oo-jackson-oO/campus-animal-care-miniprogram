@@ -9,6 +9,8 @@ const Product = require('../models/Product');
 const { productValidation } = require('../middleware/validation');
 const logger = require('../utils/logger');
 
+const productModel = new Product();
+
 /**
  * 获取商品列表
  * GET /api/products?page=1&limit=10&category=文创用品&status=1
@@ -26,7 +28,7 @@ router.get('/', productValidation.getList, async (req, res, next) => {
         if (category) conditions.category = category;
         if (status !== undefined) conditions.status = parseInt(status);
 
-        const result = await Product.prototype.paginate(conditions, {
+        const result = await productModel.paginate(conditions, {
             page: parseInt(page),
             limit: parseInt(limit),
             orderBy: 'created_at',
@@ -53,7 +55,7 @@ router.get('/:id', productValidation.getById, async (req, res, next) => {
     try {
         const { id } = req.params;
 
-        const product = await Product.prototype.getProductDetail(parseInt(id));
+        const product = await productModel.getProductDetail(parseInt(id));
 
         if (!product) {
             return res.status(404).json({
@@ -83,7 +85,7 @@ router.get('/:id/reviews', productValidation.getById, async (req, res, next) => 
         const { id } = req.params;
         const { page = 1, limit = 10 } = req.query;
 
-        const reviews = await Product.prototype.getProductReviews(parseInt(id), {
+        const reviews = await productModel.getProductReviews(parseInt(id), {
             page: parseInt(page),
             limit: parseInt(limit)
         });
@@ -115,7 +117,7 @@ router.post('/:id/reviews', productValidation.createReview, async (req, res, nex
             updated_at: new Date()
         };
 
-        const result = await Product.prototype.createReview(reviewData);
+        const result = await productModel.createReview(reviewData);
 
         res.status(201).json({
             code: 201,

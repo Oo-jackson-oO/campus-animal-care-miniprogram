@@ -9,6 +9,8 @@ const Animal = require('../models/Animal');
 const { animalValidation } = require('../middleware/validation');
 const logger = require('../utils/logger');
 
+const animalModel = new Animal();
+
 /**
  * 获取动物列表
  * GET /api/animals?page=1&limit=10&species=cat&status=1
@@ -30,7 +32,7 @@ router.get('/', animalValidation.getList, async (req, res, next) => {
         if (health_status) conditions.health_status = health_status;
         if (adoption_status) conditions.adoption_status = adoption_status;
 
-        const result = await Animal.prototype.paginate(conditions, {
+        const result = await animalModel.paginate(conditions, {
             page: parseInt(page),
             limit: parseInt(limit),
             orderBy: 'created_at',
@@ -53,31 +55,6 @@ router.get('/', animalValidation.getList, async (req, res, next) => {
  * 获取动物详情
  * GET /api/animals/:id
  */
-router.get('/:id', animalValidation.getById, async (req, res, next) => {
-    try {
-        const { id } = req.params;
-
-        const animal = await Animal.prototype.getAnimalDetail(parseInt(id));
-
-        if (!animal) {
-            return res.status(404).json({
-                code: 404,
-                message: '动物不存在',
-                timestamp: Date.now()
-            });
-        }
-
-        res.json({
-            code: 200,
-            message: '获取动物详情成功',
-            data: animal,
-            timestamp: Date.now()
-        });
-    } catch (error) {
-        next(error);
-    }
-});
-
 /**
  * 创建动物信息
  * POST /api/animals
@@ -91,8 +68,8 @@ router.post('/', animalValidation.create, async (req, res, next) => {
             updated_at: new Date()
         };
 
-        const result = await Animal.prototype.create(animalData);
-        const newAnimal = await Animal.prototype.findById(result.id);
+        const result = await animalModel.create(animalData);
+        const newAnimal = await animalModel.findById(result.id);
 
         res.status(201).json({
             code: 201,
@@ -117,7 +94,7 @@ router.put('/:id', animalValidation.getById, async (req, res, next) => {
             updated_at: new Date()
         };
 
-        const result = await Animal.prototype.update(parseInt(id), updateData);
+        const result = await animalModel.update(parseInt(id), updateData);
 
         if (result.affectedRows === 0) {
             return res.status(404).json({
@@ -127,7 +104,7 @@ router.put('/:id', animalValidation.getById, async (req, res, next) => {
             });
         }
 
-        const updatedAnimal = await Animal.prototype.findById(parseInt(id));
+        const updatedAnimal = await animalModel.findById(parseInt(id));
 
         res.json({
             code: 200,
@@ -148,7 +125,7 @@ router.delete('/:id', animalValidation.getById, async (req, res, next) => {
     try {
         const { id } = req.params;
 
-        const result = await Animal.prototype.softDelete(parseInt(id));
+        const result = await animalModel.softDelete(parseInt(id));
 
         if (result.affectedRows === 0) {
             return res.status(404).json({
@@ -174,7 +151,7 @@ router.delete('/:id', animalValidation.getById, async (req, res, next) => {
  */
 router.get('/stats/overview', async (req, res, next) => {
     try {
-        const stats = await Animal.prototype.getAnimalStats();
+        const stats = await animalModel.getAnimalStats();
 
         res.json({
             code: 200,
@@ -203,7 +180,7 @@ router.get('/search', async (req, res, next) => {
             });
         }
 
-        const animals = await Animal.prototype.searchAnimals(keyword.trim(), {
+        const animals = await animalModel.searchAnimals(keyword.trim(), {
             limit: parseInt(limit),
             offset: parseInt(offset)
         });
@@ -212,6 +189,35 @@ router.get('/search', async (req, res, next) => {
             code: 200,
             message: '搜索动物成功',
             data: animals,
+            timestamp: Date.now()
+        });
+    } catch (error) {
+        next(error);
+    }
+});
+
+/**
+ * 获取动物详情
+ * GET /api/animals/:id
+ */
+router.get('/:id', animalValidation.getById, async (req, res, next) => {
+    try {
+        const { id } = req.params;
+
+        const animal = await animalModel.getAnimalDetail(parseInt(id));
+
+        if (!animal) {
+            return res.status(404).json({
+                code: 404,
+                message: '动物不存在',
+                timestamp: Date.now()
+            });
+        }
+
+        res.json({
+            code: 200,
+            message: '获取动物详情成功',
+            data: animal,
             timestamp: Date.now()
         });
     } catch (error) {
@@ -235,7 +241,7 @@ router.get('/popular', async (req, res, next) => {
             });
         }
 
-        const animals = await Animal.prototype.getPopularAnimals(parseInt(limit));
+        const animals = await animalModel.getPopularAnimals(parseInt(limit));
 
         res.json({
             code: 200,
@@ -265,7 +271,7 @@ router.put('/:id/status', animalValidation.getById, async (req, res, next) => {
             });
         }
 
-        const result = await Animal.prototype.updateStatus(parseInt(id), status);
+        const result = await animalModel.updateStatus(parseInt(id), status);
 
         if (result.affectedRows === 0) {
             return res.status(404).json({

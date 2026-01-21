@@ -1,0 +1,12 @@
+<view class="st">
+  <view class="st-left">
+    <text class="st-title">{{title}}</text>
+    <text wx:if="{{subtitle}}" class="st-subtitle">{{subtitle}}</text>
+  </view>
+  <view class="st-right" wx:if="{{rightText || showArrow}}">
+    <text wx:if="{{rightText}}" class="st-right-text">{{rightText}}</text>
+    <text wx:if="{{showArrow}}" class="st-arrow">›</text>
+    <slot name="right"></slot>
+  </view>
+</view>
+

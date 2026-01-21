@@ -29,6 +29,23 @@ CREATE TABLE IF NOT EXISTS users (
     INDEX idx_status (status)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='用户表';
 
+-- 兼容升级：补齐 last_login_at 字段（避免重复执行时报错）
+SET @__col_exists := (
+  SELECT COUNT(*)
+  FROM information_schema.COLUMNS
+  WHERE TABLE_SCHEMA = DATABASE()
+    AND TABLE_NAME = 'users'
+    AND COLUMN_NAME = 'last_login_at'
+);
+SET @__sql := IF(
+  @__col_exists = 0,
+  'ALTER TABLE users ADD COLUMN last_login_at TIMESTAMP NULL DEFAULT NULL COMMENT ''最后登录时间''',
+  'SELECT 1'
+);
+PREPARE __stmt FROM @__sql;
+EXECUTE __stmt;
+DEALLOCATE PREPARE __stmt;
+
 -- 动物信息表
 CREATE TABLE IF NOT EXISTS animals (
     id INT PRIMARY KEY AUTO_INCREMENT,
@@ -237,17 +254,17 @@ GROUP BY p.id, p.name, p.sales, p.rating;
 -- 创建存储过程：更新商品评分
 DELIMITER //
 DROP PROCEDURE IF EXISTS UpdateProductRating //
-CREATE PROCEDURE UpdateProductRating(IN product_id INT)
+CREATE PROCEDURE UpdateProductRating(IN p_product_id INT)
 BEGIN
     DECLARE avg_rating DECIMAL(3,2);
     
     SELECT AVG(rating) INTO avg_rating
     FROM product_reviews 
-    WHERE product_id = product_id AND status = 1;
+    WHERE product_id = p_product_id AND status = 1;
     
     UPDATE products 
     SET rating = COALESCE(avg_rating, 0.00)
-    WHERE id = product_id;
+    WHERE id = p_product_id;
 END //
 DELIMITER ;
 
@@ -283,4 +300,3 @@ INSERT IGNORE INTO users (openid, nickname, avatar_url, gender, status) VALUES
 
 -- 显示创建结果
 SELECT 'Database and tables created successfully!' as message;
-

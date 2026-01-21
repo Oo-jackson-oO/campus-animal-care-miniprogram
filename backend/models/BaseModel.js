@@ -7,8 +7,24 @@ const { query, transaction } = require('../config/database');
 const logger = require('../utils/logger');
 
 class BaseModel {
-    constructor(tableName) {
+    constructor(tableName, options = {}) {
         this.tableName = tableName;
+        this.statusField = options.statusField || 'status';
+        this.hasStatus = options.hasStatus !== false;
+        this.activeCondition = options.activeCondition || null;
+        this.activeParams = Array.isArray(options.activeParams) ? options.activeParams : [];
+        this.inactiveValue = options.inactiveValue !== undefined ? options.inactiveValue : 0;
+    }
+
+    getActiveFilter(conditions = {}) {
+        if (!this.hasStatus) return null;
+        if (conditions && Object.prototype.hasOwnProperty.call(conditions, this.statusField)) {
+            return null;
+        }
+        if (this.activeCondition) {
+            return { sql: this.activeCondition, params: [...this.activeParams] };
+        }
+        return { sql: `${this.statusField} = ?`, params: [1] };
     }
 
     /**
@@ -20,8 +36,9 @@ class BaseModel {
     async findById(id, fields = ['*']) {
         try {
             const fieldStr = fields.join(', ');
-            const sql = `SELECT ${fieldStr} FROM ${this.tableName} WHERE id = ? AND status = 1`;
-            const results = await query(sql, [id]);
+            const active = this.getActiveFilter();
+            const sql = `SELECT ${fieldStr} FROM ${this.tableName} WHERE id = ?${active ? ` AND ${active.sql}` : ''}`;
+            const results = await query(sql, [id, ...(active ? active.params : [])]);
 
             logger.database('SELECT', this.tableName, `查询ID: ${id}`);
             return results.length > 0 ? results[0] : null;
@@ -62,6 +79,12 @@ class BaseModel {
                 }
             });
 
+            const active = this.getActiveFilter(conditions);
+            if (active) {
+                whereConditions.push(active.sql);
+                params.push(...active.params);
+            }
+
             if (whereConditions.length > 0) {
                 sql += ` WHERE ${whereConditions.join(' AND ')}`;
             }
@@ -69,9 +92,9 @@ class BaseModel {
             // 添加排序
             sql += ` ORDER BY ${orderBy} ${order}`;
 
-            // 添加分页
-            sql += ` LIMIT ? OFFSET ?`;
-            params.push(limit, offset);
+            const safeLimit = Number.isFinite(Number(limit)) ? Math.max(0, Math.min(parseInt(limit), 1000)) : 100;
+            const safeOffset = Number.isFinite(Number(offset)) ? Math.max(0, parseInt(offset)) : 0;
+            sql += ` LIMIT ${safeLimit} OFFSET ${safeOffset}`;
 
             const results = await query(sql, params);
 
@@ -154,6 +177,12 @@ class BaseModel {
                     params.push(conditions[key]);
                 }
             });
+
+            const active = this.getActiveFilter(conditions);
+            if (active) {
+                whereConditions.push(active.sql);
+                params.push(...active.params);
+            }
 
             if (whereConditions.length > 0) {
                 sql += ` WHERE ${whereConditions.join(' AND ')}`;
@@ -238,8 +267,12 @@ class BaseModel {
      */
     async softDelete(id) {
         try {
-            const sql = `UPDATE ${this.tableName} SET status = 0, updated_at = NOW() WHERE id = ?`;
-            const result = await query(sql, [id]);
+            if (!this.hasStatus) {
+                throw new Error(`${this.tableName} 不支持软删除（无状态字段）`);
+            }
+
+            const sql = `UPDATE ${this.tableName} SET ${this.statusField} = ?, updated_at = NOW() WHERE id = ?`;
+            const result = await query(sql, [this.inactiveValue, id]);
 
             logger.database('DELETE', this.tableName, `软删除ID: ${id}`);
 

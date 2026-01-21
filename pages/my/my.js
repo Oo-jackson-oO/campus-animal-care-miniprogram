@@ -1,43 +1,65 @@
 const systemInfoManager = require('../../utils/systemInfo');
+const dataService = require('../../utils/dataService');
 
 Page({
   data: {
-    weekDonate: 500,
-    totalDonate: 2000,
-    favoriteAnimals: [
-      { id: 1, name: "小橘", image: "/image/dog.png", description: "友善亲人的橘猫" }
-    ],
-    myRank: 5,
-    otherRanks: [
-      { name: "爱心天使", amount: 3000 },
-      { name: "守护者", amount: 2500 },
-      { name: "暖心人", amount: 2200 },
-      { name: "小太阳", amount: 2100 }
-    ],
-    isFixed: false
+    weekDonate: 0,
+    totalDonate: 0,
+    userName: '访客',
+    userAvatar: '/image/dog.png',
+    favoriteAnimals: [],
+    myRank: '-',
+    otherRanks: [],
+    isFixed: false,
+    loading: true
   },
 
-  onLoad() {
+  async onLoad() {
     console.log('个人中心页面加载完成');
-  },
+    this.setData({ loading: true });
+    try {
+      const user = await dataService.ensureUser();
+      this.setData({
+        userName: user.nickname || '访客',
+        userAvatar: user.avatar_url || '/image/dog.png'
+      });
 
-  onShow() {
-    // 减少重复日志输出
-    if (!systemInfoManager.isDevTools()) {
-      console.log('个人中心页面显示');
+      const [stats, ranking, animals] = await Promise.all([
+        dataService.getUserStats(user.id),
+        dataService.getUserRanking(10),
+        dataService.getAnimals({ page: 1, limit: 3 })
+      ]);
+
+      const rankingList = Array.isArray(ranking) ? ranking : [];
+      const me = rankingList.find(r => r.id === user.id);
+      const others = rankingList.filter(r => r.id !== user.id);
+
+      this.setData({
+        weekDonate: Number(stats?.week_amount) || 0,
+        totalDonate: Number(stats?.total_amount) || 0,
+        myRank: me?.rank || '-',
+        otherRanks: others.map(r => ({
+          name: r.nickname,
+          amount: Number(r.total_donations) || 0
+        })),
+        favoriteAnimals: Array.isArray(animals) ? animals.map(a => ({
+          id: a.id,
+          name: a.name,
+          image: a.image,
+          description: a.description
+        })) : [],
+        loading: false
+      });
+    } catch (error) {
+      console.error('加载个人中心数据失败:', error);
+      this.setData({ loading: false });
     }
   },
 
-  onPageScroll(e) {
-    // 监听滚动，固定自己排名在顶部
-    const query = wx.createSelectorQuery().in(this);
-    query.select('#myRank').boundingClientRect(rect => {
-      if (rect && e.scrollTop > rect.top) {
-        this.setData({ isFixed: true });
-      } else {
-        this.setData({ isFixed: false });
-      }
-    }).exec();
+  onShow() {
+    if (systemInfoManager.isDevTools()) {
+      console.log('个人中心页面显示');
+    }
   },
 
   // 点击收藏的动物

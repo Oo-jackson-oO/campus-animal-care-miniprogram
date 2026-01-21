@@ -1,4 +1,7 @@
 {
   "navigationBarTitleText": "个人中心",
-  "usingComponents": {}
+  "usingComponents": {
+    "section-title": "../../components/section-title/section-title",
+    "empty-state": "../../components/empty-state/empty-state"
+  }
 }

@@ -13,6 +13,8 @@ const productRoutes = require('./product');
 const donationRoutes = require('./donation');
 const commentRoutes = require('./comment');
 const noticeRoutes = require('./notice');
+const wechatRoutes = require('./wechat');
+const payRoutes = require('./pay');
 
 // 注册路由
 router.use('/user', userRoutes);
@@ -21,6 +23,8 @@ router.use('/products', productRoutes);
 router.use('/donations', donationRoutes);
 router.use('/comments', commentRoutes);
 router.use('/notices', noticeRoutes);
+router.use('/wechat', wechatRoutes);
+router.use('/pay', payRoutes);
 
 // 根路径
 router.get('/', (req, res) => {
@@ -36,7 +40,9 @@ router.get('/', (req, res) => {
                 products: '/api/products',
                 donations: '/api/donations',
                 comments: '/api/comments',
-                notices: '/api/notices'
+                notices: '/api/notices',
+                wechat: '/api/wechat',
+                pay: '/api/pay'
             }
         }
     });

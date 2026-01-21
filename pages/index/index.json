@@ -1,4 +1,8 @@
 {
   "navigationBarTitleText": "首页",
-  "usingComponents": {}
+  "usingComponents": {
+    "section-title": "../../components/section-title/section-title",
+    "empty-state": "../../components/empty-state/empty-state",
+    "skeleton": "../../components/skeleton/skeleton"
+  }
 }

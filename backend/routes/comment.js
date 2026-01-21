@@ -9,6 +9,8 @@ const Comment = require('../models/Comment');
 const { commentValidation } = require('../middleware/validation');
 const logger = require('../utils/logger');
 
+const commentModel = new Comment();
+
 /**
  * 获取动物评论列表
  * GET /api/comments/animal/:id?page=1&limit=10
@@ -18,7 +20,7 @@ router.get('/animal/:id', commentValidation.getList, async (req, res, next) => {
         const { id } = req.params;
         const { page = 1, limit = 10 } = req.query;
 
-        const comments = await Comment.prototype.getAnimalComments(parseInt(id), {
+        const comments = await commentModel.getAnimalComments(parseInt(id), {
             page: parseInt(page),
             limit: parseInt(limit)
         });
@@ -50,7 +52,7 @@ router.post('/animal/:id', commentValidation.create, async (req, res, next) => {
             updated_at: new Date()
         };
 
-        const result = await Comment.prototype.create(commentData);
+        const result = await commentModel.create(commentData);
 
         res.status(201).json({
             code: 201,
@@ -89,7 +91,7 @@ router.post('/:id/reply', async (req, res, next) => {
             updated_at: new Date()
         };
 
-        const result = await Comment.prototype.create(replyData);
+        const result = await commentModel.create(replyData);
 
         res.status(201).json({
             code: 201,

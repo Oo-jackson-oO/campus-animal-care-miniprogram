@@ -8,7 +8,11 @@ const logger = require('../utils/logger');
 
 class Notice extends BaseModel {
     constructor() {
-        super('notices');
+        super('notices', {
+            activeCondition: 'status = ?',
+            activeParams: ['active'],
+            inactiveValue: 'inactive'
+        });
     }
 
     /**

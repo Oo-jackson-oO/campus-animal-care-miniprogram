@@ -1,5 +1,5 @@
 <view class="container">
-  <view class="title">守护侠 - 本周事项</view>
+  <section-title title="守护侠" subtitle="本周事项"></section-title>
   
   <!-- 周历控制 + 月份/周数显示 -->
   <view class="week-control">
@@ -32,19 +32,23 @@
         bindtap="onDateTap"
         data-index="{{index}}"
       >
-        <text class="date-number">{{item.date.getDate()}}</text>
+        <text class="date-number">{{item.dayNum}}</text>
       </view>
     </view>
   </view>
 
   <!-- 本周事项标题 -->
-  <view class="section-title">本周事项</view>
+  <section-title title="本周事项"></section-title>
 
   <!-- 捐款进度列表 -->
-  <view class="progress-list" wx:if="{{filteredAnimals.length > 0}}">
+  <view wx:if="{{loading}}">
+    <skeleton rows="4"></skeleton>
+    <skeleton rows="4"></skeleton>
+  </view>
+  <view class="progress-list" wx:elif="{{filteredAnimals.length > 0}}">
     <view class="animal-card" wx:for="{{filteredAnimals}}" wx:key="id">
       <view class="animal-info">
-        <image src="{{item.image}}" mode="aspectFill" class="animal-avatar"></image>
+        <image src="{{item.image}}" mode="aspectFill" class="animal-avatar" lazy-load="true"></image>
         <view class="animal-details">
           <text class="animal-name">{{item.name}}</text>
           <text class="animal-need">{{item.need}}</text>
@@ -53,7 +57,7 @@
       
       <view class="progress-container">
         <progress 
-          percent="{{(item.donateCurrent / item.donateTarget)*100}}" 
+          percent="{{item.percent}}" 
           stroke-width="8"
           class="progress-bar"
         />
@@ -69,7 +73,7 @@
           placeholder="输入捐款金额" 
           bindinput="onDonateInput" 
           data-id="{{item.id}}"
-          class="donate-input"
+          class="donate-input input-modern"
           value="{{donateInput[item.id]}}"
         />
         <button bindtap="handleDonate" data-id="{{item.id}}" class="donate-btn">捐款</button>
@@ -78,7 +82,5 @@
   </view>
   
   <!-- 无事项时显示 -->
-  <view class="no-events" wx:if="{{filteredAnimals.length === 0}}">
-    <text>该日期暂无事项安排</text>
-  </view>
+  <empty-state wx:else text="该日期暂无事项安排" subtext="可以切换日期看看其它事项"></empty-state>
 </view>

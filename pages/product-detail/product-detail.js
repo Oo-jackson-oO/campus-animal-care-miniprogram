@@ -4,6 +4,7 @@ Page({
     data: {
         product: null,
         reviews: [],
+        reviewCountText: '',
         currentImageIndex: 0,
         quantity: 1,
         showImagePreview: false,
@@ -66,7 +67,10 @@ Page({
                 ...review,
                 createTime: this.formatTime(review.createTime)
             })) : [];
-            this.setData({ reviews: formattedReviews });
+            this.setData({
+                reviews: formattedReviews,
+                reviewCountText: `${formattedReviews.length}条`
+            });
         } catch (error) {
             console.error('加载评价失败:', error);
         }
@@ -112,6 +116,16 @@ Page({
             wx.previewImage({
                 current: product.images[index || 0],
                 urls: product.images
+            });
+        }
+    },
+
+    previewReviewImage(e) {
+        const { urls, current } = e.currentTarget.dataset;
+        if (Array.isArray(urls) && urls.length > 0) {
+            wx.previewImage({
+                current: current || urls[0],
+                urls
             });
         }
     },
@@ -208,38 +222,28 @@ Page({
     },
 
     // 处理购买
-    processPurchase() {
+    async processPurchase() {
         const { product, quantity } = this.data;
 
-        // 模拟购买成功
         wx.showLoading({
             title: '处理中...'
         });
-
-        setTimeout(() => {
+        try {
+            await dataService.payOrder(product.id, quantity);
             wx.hideLoading();
             wx.showToast({
-                title: '购买成功！',
+                title: '支付成功！',
                 icon: 'success'
             });
-
-            // 更新库存
-            const updatedProduct = {
-                ...product,
-                stock: product.stock - quantity,
-                sales: product.sales + quantity
-            };
-
-            this.setData({ product: updatedProduct });
-
-            // 模拟跳转到订单页面
-            setTimeout(() => {
-                wx.showToast({
-                    title: '感谢您的购买！',
-                    icon: 'success'
-                });
-            }, 1500);
-        }, 2000);
+            await this.loadProductData(product.id);
+        } catch (error) {
+            wx.hideLoading();
+            console.error('支付失败:', error);
+            wx.showToast({
+                title: '支付失败',
+                icon: 'none'
+            });
+        }
     },
 
     // 加入购物车

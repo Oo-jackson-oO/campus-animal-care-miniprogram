@@ -1,0 +1,6 @@
+<view class="empty">
+  <image wx:if="{{image}}" class="empty-image" src="{{image}}" mode="aspectFit"></image>
+  <text class="empty-text">{{text}}</text>
+  <text wx:if="{{subtext}}" class="empty-subtext">{{subtext}}</text>
+</view>
+

@@ -1,17 +1,18 @@
 // app.js
-App({
-  onLaunch() {
-    // 展示本地存储能力
-    const logs = wx.getStorageSync('logs') || []
-    logs.unshift(Date.now())
-    wx.setStorageSync('logs', logs)
+const dataService = require('./utils/dataService');
 
-    // 登录
-    wx.login({
-      success: res => {
-        // 发送 res.code 到后台换取 openId, sessionKey, unionId
-      }
-    })
+App({
+  async onLaunch() {
+    const logs = wx.getStorageSync('logs') || [];
+    logs.unshift(Date.now());
+    wx.setStorageSync('logs', logs);
+
+    try {
+      const user = await dataService.ensureUser();
+      this.globalData.userInfo = user;
+    } catch (error) {
+      console.error('初始化用户失败:', error);
+    }
   },
   globalData: {
     userInfo: null

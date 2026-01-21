@@ -55,6 +55,9 @@ Thumbs.db
 *.swp
 *.swo
 
+# Trae IDE
+.trae/
+
 # 临时文件
 *.tmp
 *.temp

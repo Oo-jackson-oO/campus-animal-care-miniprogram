@@ -1,13 +1,14 @@
 const dataService = require('../../utils/dataService');
 const logger = require('../../utils/logger');
-const systemInfoManager = require('../../utils/systemInfo');
+const navigation = require('../../utils/navigation');
 
 Page({
   data: {
     notices: [],
     products: [],
     animals: [],
-    currentNoticeIndex: 0
+    currentNoticeIndex: 0,
+    loading: true
   },
 
   async onLoad() {
@@ -21,6 +22,7 @@ Page({
 
   // 加载数据
   async loadData() {
+    this.setData({ loading: true });
     try {
       // 加载公告数据
       const notices = await dataService.getNotices();
@@ -38,7 +40,8 @@ Page({
       this.setData({
         notices: processedNotices,
         animals: Array.isArray(animals) ? animals : [],
-        products: Array.isArray(products) ? products : []
+        products: Array.isArray(products) ? products : [],
+        loading: false
       });
     } catch (error) {
       console.error('加载数据失败:', error);
@@ -46,6 +49,7 @@ Page({
         title: '数据加载失败',
         icon: 'none'
       });
+      this.setData({ loading: false });
     }
   },
 
@@ -152,14 +156,11 @@ Page({
     }
 
     if (url) {
-      wx.navigateTo({
-        url: url,
-        fail: () => {
-          wx.showToast({
-            title: '页面跳转失败',
-            icon: 'none'
-          });
-        }
+      navigation.navigate(url).catch(() => {
+        wx.showToast({
+          title: '页面跳转失败',
+          icon: 'none'
+        });
       });
     }
   },
